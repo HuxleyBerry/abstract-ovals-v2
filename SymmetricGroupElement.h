@@ -155,6 +155,10 @@ public:
         return cycleSizes;
     }
 
+    int actOn(int p) {
+        return m_image[p];
+    }
+
 private:
     std::array<int, N> m_image;
 

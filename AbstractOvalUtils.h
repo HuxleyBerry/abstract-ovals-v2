@@ -7,6 +7,18 @@
 #include <array>
 #include <utility>
 
+struct FourPoints {
+    unsigned int first;
+    unsigned int second;
+    unsigned int third;
+    unsigned int fourth;
+
+    FourPoints(unsigned int i, unsigned int j, unsigned int k,unsigned int n): first(i), second(j), third(k), fourth(n) {}
+};
+
+std::vector<FourPoints> getPointCombinationsForAbstractOval(int order);
+
+int quadrupleToInt(const FourPoints& q, int order);
 
 template <int order>
 std::vector<SymmetricGroupElement<order + 1>> getAbstractOvalCandidatePermutations() {
@@ -38,5 +50,35 @@ std::vector<SymmetricGroupElement<order + 1>> getAbstractOvalCandidatePermutatio
         return zeroFixedConjugacyClass;
     }
 }
+
+template <int order>
+std::vector<std::vector<int>> getCovering() {
+    std::vector<SymmetricGroupElement<order + 1>> candidatePermutations = getAbstractOvalCandidatePermutations<order>();
+    std::vector<int> quadrupleToIndex;
+    quadrupleToIndex.reserve((order+1)*(order+1)*(order+1)*(order+1)); //larger than necessary, but allows a simple from quadruples to int;
+    std::vector<FourPoints> quadruples(getPointCombinationsForAbstractOval(order));
+    for (int i = 0; i < quadruples.size(); ++i) {
+        quadrupleToIndex[quadrupleToInt(quadruples[i], order)] = i;
+    }
+
+    std::vector<std::vector<int>> ans(candidatePermutations.size());
+    for (int i = 0; i < candidatePermutations.size(); ++i) {
+        for (int a = 0; a < order + 1; ++a) {
+            int aImage = candidatePermutations[i].actOn(a);
+            if (aImage >= a) {
+                for (int b = a + 1; b < order + 1; ++b) {
+                    int bImage = candidatePermutations[i].actOn(b);
+                    if (bImage >= b) {
+                        ans[i].push_back(quadrupleToIndex[quadrupleToInt(FourPoints(a, aImage, b, bImage), order)]);
+                    }
+                }
+            }
+        }
+    }
+    return ans;
+}
+
+// move this function elsewhere?
+void printCovering(const std::vector<std::vector<int>>& covering);
 
 #endif
