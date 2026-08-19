@@ -7,6 +7,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <utility>
 
 template <int N>
 class SymmetricGroupElement;
@@ -24,7 +25,7 @@ public:
         }
     }
 
-    SymmetricGroupElement<N>(std::array<int, N>&& images): m_image(images) {}
+    SymmetricGroupElement<N>(std::array<int, N> images): m_image(std::move(images)) {}
 
     SymmetricGroupElement(const std::string& stringForm) {
         for (int i = 0; i < N; ++i) {

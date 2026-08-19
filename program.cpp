@@ -2,6 +2,7 @@
 #include <vector>
 #include "SymmetricGroupElement.h"
 #include "SymmetricGroupUtils.h"
+#include "AbstractOvalUtils.h"
 
 struct FourPoints {
     unsigned int first;
@@ -38,5 +39,5 @@ int main() {
     //std::cout << listOfPermutationsToString(getConjugacyClass(p4)) << "\n";
     SymmetricGroupElement<5> p5("(2,3)");
     SymmetricGroupElement<8> p6("(0,1)(2,3,4,5,6)");
-    std::cout << listOfPermutationsToString(getConjugacyClass(p6)) << "\n";
+    std::cout << listOfPermutationsToString(getAbstractOvalCandidatePermutations<5>()) << "\n";
 }
