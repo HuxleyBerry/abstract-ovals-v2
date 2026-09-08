@@ -70,14 +70,14 @@ std::vector<std::vector<int>> algorithmX(const std::vector<std::vector<int>>& da
     std::vector<std::vector<int>> solutions;
 
     Node* latticeRoot = makeLattice(data, itemCount);
-    std::vector<int> partialSolution(1024);
+    std::vector<int> partialSolution(itemCount); // assumes every option covers at least one item.
     algorithmXHelper(latticeRoot, solutions, 0, partialSolution);
     freeLattice(latticeRoot);
 
     return solutions;
 }
 
-void algorithmXHelper(Node* latticeRoot, std::vector<std::vector<int>>& solutions, int optionsSoFarCount, std::vector<int> partialSolution) {
+void algorithmXHelper(Node* latticeRoot, std::vector<std::vector<int>>& solutions, int optionsSoFarCount, std::vector<int>& partialSolution) {
     if (latticeRoot->R == latticeRoot) {
         solutions.emplace_back(partialSolution.cbegin(), partialSolution.cbegin() + optionsSoFarCount);
         return;
@@ -85,15 +85,11 @@ void algorithmXHelper(Node* latticeRoot, std::vector<std::vector<int>>& solution
     // find the item covered by the fewest options in order to minimise branching factor
     Node* columnHeader = getColumnIncludedInFewestOptions(latticeRoot);
     coverColumn(columnHeader);
-    //std::cout << "chosen to cover item " << columnHeader->itemIndex << "\n";
     // loop through all the options covering the item
     Node* currentNodeForItem = columnHeader->D;
     while (currentNodeForItem != columnHeader) {
         Node* currentNodeForOption = currentNodeForItem->R;
-        //std::cout << "hmm\n";
-        //return;
         while (currentNodeForOption != currentNodeForItem) {
-            //std::cout << "forced covering of item " << currentNodeForOption->header << "\n";
             coverColumn(currentNodeForOption->header);
             currentNodeForOption = currentNodeForOption->R;
         }
@@ -101,7 +97,6 @@ void algorithmXHelper(Node* latticeRoot, std::vector<std::vector<int>>& solution
         algorithmXHelper(latticeRoot, solutions, optionsSoFarCount + 1, partialSolution);
         currentNodeForOption = currentNodeForItem->L;
         while (currentNodeForOption != currentNodeForItem) {
-            //std::cout << "uncovering" << currentNodeForOption->header << "\n";
             uncoverColumn(currentNodeForOption->header);
             currentNodeForOption = currentNodeForOption->L;
         }
@@ -182,13 +177,6 @@ void addToEndOfVerticalDoublyLinkedList(Node* start, Node* toAdd) {
     start->U = toAdd;
     toAdd->U = end;
     toAdd->D = start;
-}
-
-void safelyAddToVector(std::vector<int> v, int idx, int num) {
-    if (v.size() <= idx) {
-        v.resize(2*v.size());
-        v[idx] = num;
-    }
 }
 
 void printNode(const Node& node) {

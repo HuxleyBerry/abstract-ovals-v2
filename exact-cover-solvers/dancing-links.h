@@ -23,7 +23,7 @@ Node* makeLattice(const std::vector<std::vector<int>>& data, int itemCount);
 
 std::vector<std::vector<int>> algorithmX(const std::vector<std::vector<int>>& data, int itemCount);
 
-void algorithmXHelper(Node* latticeRoot, std::vector<std::vector<int>>& solutions, int optionsSoFarCount, std::vector<int> partialSolution);
+void algorithmXHelper(Node* latticeRoot, std::vector<std::vector<int>>& solutions, int optionsSoFarCount, std::vector<int>& partialSolution);
 
 Node* getColumnIncludedInFewestOptions(Node* latticeRoot);
 
@@ -40,8 +40,5 @@ void freeLattice(Node* latticeRoot);
 void addToEndOfHorizontalDoublyLinkedList(Node* start, Node* toAdd);
 
 void addToEndOfVerticalDoublyLinkedList(Node* start, Node* toAdd);
-
-// assumes v.size() > 0 and idx < 2 * v.size() (i.e. that doubling the size of the vector will be enough)
-void safelyAddToVector(std::vector<int> v, int idx, int num);
 
 #endif
