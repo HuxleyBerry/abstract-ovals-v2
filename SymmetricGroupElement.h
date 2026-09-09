@@ -155,7 +155,7 @@ public:
         return cycleSizes;
     }
 
-    int actOn(int p) {
+    int actOn(int p) const {
         return m_image[p];
     }
 

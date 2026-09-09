@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include <utility>
+#include <string>
 
 struct FourPoints {
     unsigned int first;
@@ -14,6 +15,11 @@ struct FourPoints {
     unsigned int fourth;
 
     FourPoints(unsigned int i, unsigned int j, unsigned int k,unsigned int n): first(i), second(j), third(k), fourth(n) {}
+
+    // for debugging
+    std::string toString() {
+        return "((" + std::to_string(first) + ", " + std::to_string(second) + "), (" + std::to_string(third) + ", " + std::to_string(fourth) + "))";
+    }
 };
 
 std::vector<FourPoints> getPointCombinationsForAbstractOval(int order);
@@ -44,7 +50,6 @@ std::vector<SymmetricGroupElement<order + 1>> getAbstractOvalCandidatePermutatio
         SymmetricGroupElement<order + 1> twoFixedRepresentative(std::move(permArray));
         std::vector<SymmetricGroupElement<order + 1>> zeroFixedConjugacyClass = getConjugacyClass(zeroFixedRepresentative);
         std::vector<SymmetricGroupElement<order + 1>> twoFixedConjugacyClass = getConjugacyClass(twoFixedRepresentative);
-        std::cout << zeroFixedConjugacyClass.size() << " " << twoFixedConjugacyClass.size() << "\n";
         zeroFixedConjugacyClass.reserve(zeroFixedConjugacyClass.size() + twoFixedConjugacyClass.size());
         zeroFixedConjugacyClass.insert(zeroFixedConjugacyClass.end(), std::make_move_iterator(twoFixedConjugacyClass.begin()), std::make_move_iterator(twoFixedConjugacyClass.end()));
         return zeroFixedConjugacyClass;
@@ -52,11 +57,9 @@ std::vector<SymmetricGroupElement<order + 1>> getAbstractOvalCandidatePermutatio
 }
 
 template <int order>
-std::vector<std::vector<int>> getCovering() {
-    std::vector<SymmetricGroupElement<order + 1>> candidatePermutations = getAbstractOvalCandidatePermutations<order>();
+std::vector<std::vector<int>> getCovering(const std::vector<SymmetricGroupElement<order + 1>>& candidatePermutations, const std::vector<FourPoints>& quadruples) {
     std::vector<int> quadrupleToIndex;
-    quadrupleToIndex.reserve((order+1)*(order+1)*(order+1)*(order+1)); //larger than necessary, but allows a simple from quadruples to int;
-    std::vector<FourPoints> quadruples(getPointCombinationsForAbstractOval(order));
+    quadrupleToIndex.reserve((order+1)*(order+1)*(order+1)*(order+1)); //larger than necessary, but allows a simple mapping from quadruples to int;
     for (int i = 0; i < quadruples.size(); ++i) {
         quadrupleToIndex[quadrupleToInt(quadruples[i], order)] = i;
     }
