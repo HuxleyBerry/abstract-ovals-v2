@@ -84,4 +84,20 @@ std::vector<std::vector<int>> getCovering(const std::vector<SymmetricGroupElemen
 // move this function elsewhere?
 void printCovering(const std::vector<std::vector<int>>& covering);
 
+// this function does not check if the permutations are involutions
+template <int order>
+bool arePermutationsCompatible(const SymmetricGroupElement<order + 1>& s, const SymmetricGroupElement<order + 1>& r) {
+    for (int A = 0; A < order + 1; ++A) {
+        for (int B = 0; B < order + 1; ++B) {
+            if (B != A && B != s.actOn(A)){
+                auto product = s * r;
+                if (product.actOn(A) == A && product.actOn(B) == B) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 #endif

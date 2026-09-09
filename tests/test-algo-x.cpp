@@ -142,8 +142,3 @@ void TestAlgoXV1() {
     solutions = algorithmX(data, 7);
     assertSolutionListCorrect(solutions, expectedSolutions);
 }
-    
-
-int main() {
-    TestAlgoXV1();
-}
