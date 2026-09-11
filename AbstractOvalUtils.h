@@ -100,4 +100,20 @@ bool arePermutationsCompatible(const SymmetricGroupElement<order + 1>& s, const 
     return true;
 }
 
+template <int order>
+bool validateAbstractOval(const std::vector<SymmetricGroupElement<order + 1>>& permutations) {
+    if (permutations.size() != order * order) {
+        std::cout << "??" << order << " " << permutations.size() << "\n";
+        return false;
+    }
+    for (int i = 0; i < permutations.size(); ++i) {
+        for (int j = i + 1; j < permutations.size(); ++j) {
+            if (!arePermutationsCompatible<order>(permutations[i], permutations[j])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 #endif
