@@ -1,12 +1,19 @@
 #include <iostream>
+#include <string>
+#include "TestSuite.h"
+#include "TestAbstractOvalFinder.h"
+#include "TestAbstractOvalUtils.h"
+#include "TestAlgoX.h"
 
-void TestAlgoXV1();
-void TestCompatibility();
-void TestAbstractOvalFinder();
+#define RunTestSuite(SuiteName) { SuiteName s = SuiteName(); runTestSuite(s, #SuiteName); }
+
+void runTestSuite(TestSuite& suite, const char* name) {
+        std::cout << "Running " << std::string(name) << " Test Suite\n";
+        suite.runAllTests();
+}
 
 int main() {
-    TestAlgoXV1();
-    TestCompatibility();
-    TestAbstractOvalFinder();
-    std::cout << "TESTS PASSED\n";
+    RunTestSuite(TestAlgoX);
+    RunTestSuite(TestAbstractOvalFinder);
+    RunTestSuite(TestAbstractOvalUtils);
 }

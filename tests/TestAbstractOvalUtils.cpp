@@ -1,6 +1,6 @@
 #include "../SymmetricGroupElement.h"
 #include "../AbstractOvalUtils.h"
-#include <string>
+#include "TestAbstractOvalUtils.h"
 #include <stdexcept>
 
 void TestCompatibility() {
@@ -15,4 +15,8 @@ void TestCompatibility() {
     if (arePermutationsCompatible<5>(s3, s4)) {
         throw std::runtime_error("should be incompatible");
     }
+}
+
+TestAbstractOvalUtils::TestAbstractOvalUtils() {
+    AddToTestSuite(TestCompatibility);
 }

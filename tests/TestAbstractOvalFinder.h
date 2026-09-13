@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <vector>
+#include "TestSuite.h"
 #include "../SymmetricGroupElement.h"
 #include "../AbstractOvalUtils.h"
 #include "../AbstractOvalFinder.h"
@@ -14,8 +15,9 @@ void testAbstractOvalFinderSpecificOrder() {
     }
 }
 
-void TestAbstractOvalFinder() {
-    testAbstractOvalFinderSpecificOrder<4>();
-    testAbstractOvalFinderSpecificOrder<5>();
-    testAbstractOvalFinderSpecificOrder<7>();
-}
+void TestSmallOrders();
+
+class TestAbstractOvalFinder : public TestSuite {
+public:
+    TestAbstractOvalFinder();
+};

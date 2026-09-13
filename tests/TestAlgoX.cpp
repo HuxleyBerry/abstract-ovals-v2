@@ -5,6 +5,7 @@
 #include <string>
 #include <set>
 #include <sstream>
+#include "TestAlgoX.h"
 #include "../exact-cover-solvers/dancing-links.h"
 
 using namespace std::string_literals;
@@ -17,18 +18,6 @@ std::string vectorToString(std::vector<int> v) {
     }
     ss << "]";
     return ss.str();
-}
-
-void printVector(std::vector<int> v) {
-    std::cout << vectorToString(v) << "\n";
-}
-
-void printSet(std::set<int> v) {
-    std::cout << "{";
-    for (int num: v) {
-        std::cout << num << ",";
-    }
-    std::cout << "}\n";
 }
 
 void assertSolutionListCorrect(const std::vector<std::vector<int>>& toTest, const std::vector<std::vector<int>>& expected) {
@@ -117,16 +106,6 @@ void TestAlgoXV1() {
     solutions = algorithmX(data, 8);
     assertSolutionListCorrect(solutions, expectedSolutions);
 
-    /*data = {
-        {0},
-        {1, 4, 7},
-        {1, 4},
-        {4, 5},
-        {3, 5, 6},
-        {2, 3, 7},
-        {2, 7}
-    };*/
-
     data = {
         {0, 3, 6},
         {0, 3},
@@ -141,4 +120,8 @@ void TestAlgoXV1() {
     };
     solutions = algorithmX(data, 7);
     assertSolutionListCorrect(solutions, expectedSolutions);
+}
+
+TestAlgoX::TestAlgoX()  {
+    AddToTestSuite(TestAlgoXV1);
 }
