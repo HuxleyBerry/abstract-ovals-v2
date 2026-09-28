@@ -7,11 +7,11 @@
 
 namespace {
 
-    template <int N>
+    template <size_t N>
     void getConjugacyClassHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<int, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int firstPointInMostRecentCycle);
 
     // TODO: avoid repeating when multiple of same cycle size
-    template <int N>
+    template <size_t N>
     void addAllCyclesToPartialHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<int, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int cycleProgress, int prevCycleElement, int firstCycleElement, int firstPointInMostRecentCycle) {
         int cycleSize = cycleSizes[indexIntoCycleSizes];
         if (cycleProgress == cycleSize) {
@@ -52,7 +52,7 @@ namespace {
         }
     }
 
-    template <int N>
+    template <size_t N>
     void getConjugacyClassHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<int, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int firstPointInMostRecentCycle) {
         if (indexIntoCycleSizes < cycleSizes.size()) {
             addAllCyclesToPartialHelper<N>(output, partialPermutation, cycleSizes, indexIntoCycleSizes, alreadyIncludedInPermutation, 0, -1, 0, firstPointInMostRecentCycle);
@@ -62,7 +62,7 @@ namespace {
     }
 }
 
-template <int N>
+template <size_t N>
 std::vector<SymmetricGroupElement<N>> getConjugacyClass(const SymmetricGroupElement<N>& el) { // conjugacy class in symmetric group
     std::vector<SymmetricGroupElement<N>> output;
     //TODO: consider using a bitset instead, Or just uint16_t
@@ -80,7 +80,7 @@ std::vector<SymmetricGroupElement<N>> getConjugacyClass(const SymmetricGroupElem
 }
 
 
-template <int N>
+template <size_t N>
 std::string listOfPermutationsToString(const std::vector<SymmetricGroupElement<N>>& list) {
     std::string ans = "{ ";
     for (int i = 0; i < list.size(); ++i) {

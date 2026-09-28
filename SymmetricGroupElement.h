@@ -9,13 +9,13 @@
 #include <iostream>
 #include <utility>
 
-template <int N>
+template <size_t N>
 class SymmetricGroupElement;
 
-template <int N>
+template <size_t N>
 SymmetricGroupElement<N> operator*(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right);
 
-template <int N>
+template <size_t N>
 class SymmetricGroupElement {
 public:
     SymmetricGroupElement() {
@@ -25,7 +25,9 @@ public:
         }
     }
 
-    SymmetricGroupElement<N>(std::array<int, N> images): m_image(std::move(images)) {}
+    SymmetricGroupElement<N>(const std::array<int, N>& images): m_image(images) {}
+
+    SymmetricGroupElement<N>(std::array<int, N>&& images): m_image(std::move(images)) {}
 
     SymmetricGroupElement(const std::string& stringForm) {
         for (int i = 0; i < N; ++i) {
@@ -109,6 +111,19 @@ public:
         return ans;
     }
 
+    bool operator==(const SymmetricGroupElement<N>& right) {
+        for (int i = 0; i < N; ++i) {
+            if (m_image[i] != right.m_image[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const SymmetricGroupElement<N>& right) {
+        return !(*this == right);
+    }
+
     friend SymmetricGroupElement<N> operator* <> (const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right);
     SymmetricGroupElement<N>& operator*=(const SymmetricGroupElement<N>& right) {
         *this = *this * right;
@@ -159,8 +174,9 @@ public:
         return m_image[p];
     }
 
-private:
-    std::array<int, N> m_image;
+    const std::array<int, N>& getInternalArray() const {
+        return m_image;
+    }
 
     void printInternalArray() {
         for (int num: m_image) {
@@ -168,10 +184,13 @@ private:
         }
         std::cout << "\n";
     }
+
+private:
+    std::array<int, N> m_image;
 };
 
 // acting from the left
-template <int N>
+template <size_t N>
 SymmetricGroupElement<N> operator*(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
     std::array<int, N> ans = std::array<int, N>();
     for (int i = 0; i < N; ++i) {
@@ -181,12 +200,12 @@ SymmetricGroupElement<N> operator*(const SymmetricGroupElement<N>& left, const S
 }
 
 // acting from left
-template <int N>
+template <size_t N>
 SymmetricGroupElement<N> congjugate(const SymmetricGroupElement<N>& toConjugate, const SymmetricGroupElement<N>& toConjugateWith) {
     return toConjugateWith * toConjugate * toConjugateWith.inverse();
 }
 
-template <int N>
+template <size_t N>
 std::ostream& operator<<(std::ostream& os, const SymmetricGroupElement<N>& sge) {
     return os << sge.toString();
 }

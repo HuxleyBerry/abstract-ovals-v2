@@ -9,12 +9,14 @@ PROGRAM_SOURCES := \
 	exact-cover-solvers/dancing-links.cpp \
 	exact-cover-solvers/dancing-links.h \
 	AbstractOvalFinder.h \
-	AbstractOvalFinder.cpp
+	AbstractOvalFinder.cpp \
+	orderly/MinimalImage.h \
+	orderly/MinimalImage.cpp
 
 TEST_SOURCES := \
 	$(PROGRAM_SOURCES) \
 	$(wildcard tests/*.cpp) \
-	$(wildcard tests/*.h)
+	$(wildcard tests/*.h) \
 
 all: program tests
 

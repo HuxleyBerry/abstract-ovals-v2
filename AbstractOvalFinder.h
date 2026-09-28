@@ -6,7 +6,7 @@
 #include "AbstractOvalUtils.h"
 #include "exact-cover-solvers/dancing-links.h"
 
-template <int N>
+template <size_t N>
 std::vector<std::vector<SymmetricGroupElement<N + 1>>> basicAbstractOvalFinder() {
     std::vector<SymmetricGroupElement<N + 1>> candidatePermutations(getAbstractOvalCandidatePermutations<N>());
     std::vector<FourPoints> quadruplesToBeCovered(getPointCombinationsForAbstractOval(N));
@@ -28,7 +28,7 @@ std::vector<std::vector<SymmetricGroupElement<N + 1>>> basicAbstractOvalFinder()
 
 void printAllAbstractOvals(int order);
 
-template <int N> void printAllAbstractOvals() {
+template <size_t N> void printAllAbstractOvals() {
     std::cout << "==================== Abstract Ovals of order " << std::to_string(N) << " ====================\n";
     std::vector<std::vector<SymmetricGroupElement<N + 1>>> abstractOvals = basicAbstractOvalFinder<N>();
     for (const std::vector<SymmetricGroupElement<N + 1>>& oval : abstractOvals) {

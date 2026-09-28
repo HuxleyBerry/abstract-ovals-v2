@@ -5,6 +5,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <stdexcept>
 
 class TestSuite {
 public:
@@ -19,6 +20,10 @@ protected:
 
 private:
     std::vector<std::pair<std::function<void()>, std::string>> m_testFunctions;
+};
+
+class TestException : public std::runtime_error {
+    using std::runtime_error::runtime_error;
 };
 
 #define AddToTestSuite(funcName) addFunctionToSuite([](){ funcName(); }, #funcName)

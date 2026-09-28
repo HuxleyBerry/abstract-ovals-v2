@@ -4,16 +4,18 @@
 #include "TestAbstractOvalFinder.h"
 #include "TestAbstractOvalUtils.h"
 #include "TestAlgoX.h"
+#include "TestMinimalImage.h"
 
 #define RunTestSuite(SuiteName) { SuiteName s = SuiteName(); runTestSuite(s, #SuiteName); }
 
 void runTestSuite(TestSuite& suite, const char* name) {
-        std::cout << "Running " << std::string(name) << " Test Suite\n";
-        suite.runAllTests();
+    std::cout << "Running " << std::string(name) << " Test Suite\n";
+    suite.runAllTests();
 }
 
 int main() {
     RunTestSuite(TestAlgoX);
     RunTestSuite(TestAbstractOvalFinder);
     RunTestSuite(TestAbstractOvalUtils);
+    RunTestSuite(TestMinimalImage);
 }
