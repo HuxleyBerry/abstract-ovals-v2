@@ -9,11 +9,14 @@
 
 std::vector<std::vector<size_t>> getAllPermutations(int permSize);
 
+struct InvolutionStructure {
+    std::vector<std::pair<int,int>> pairs;
+    std::pair<int, int> fixedPoints; //guaranteed to be at most two fixed points.
+};
+
 template <size_t N>
-std::vector<std::pair<int,int>> getMatchingsFromInvolution(const std::array<int, N>& arrayRep) {
-    //TODO: fix bug where we shouldn't be counting a pair of fixed points as a matching
-    std::vector<std::pair<int,int>> matchings;
-    matchings.reserve(N/2);
+InvolutionStructure getInvolutionStructure(const std::array<int, N>& arrayRep) {
+    std::vector<std::pair<int,int>> pairs;
     std::uint16_t bitset = 0;
     int firstFixed = -1;
     int secondFixed = -1;
@@ -28,15 +31,12 @@ std::vector<std::pair<int,int>> getMatchingsFromInvolution(const std::array<int,
                     secondFixed = i;
                 }
             } else {
-                matchings.emplace_back(i, image);
+                pairs.emplace_back(i, image);
                 bitset |= (1 << image);
             }
         }
     }
-    if (firstFixed != -1 && secondFixed != -1) {
-        matchings.emplace_back(firstFixed, secondFixed);
-    }
-    return matchings;
+    return { pairs, std::pair(firstFixed, secondFixed) };
 }
 
 // assumes involution has either zero, one, or two fixed points
@@ -44,29 +44,30 @@ std::vector<std::pair<int,int>> getMatchingsFromInvolution(const std::array<int,
 template <size_t N>
 std::vector<SymmetricGroupElement<N>> getInvolutionStabilizer(const SymmetricGroupElement<N>& inv) {
     std::vector<SymmetricGroupElement<N>> stabilizingPermutations;
-    std::vector<std::pair<int,int>> matchings = getMatchingsFromInvolution(inv.getInternalArray());
-    // we should have matchings.size() == N/2
-    int tempCount = 0;
-    for (const std::vector<size_t>& innerPerm: getAllPermutations(N/2)) {
-        ++tempCount;
-        if (tempCount == 2) {
-            std::cout << "innerPerm: " << innerPerm[0] << " " << innerPerm[1] << " " << innerPerm[2] << "\n";
-        }
-        for (int transpositionSelection = 0; transpositionSelection < (1 << (N/2)); ++transpositionSelection) {
+    const InvolutionStructure structure = getInvolutionStructure(inv.getInternalArray());
+    size_t pairCount = structure.pairs.size();
+    for (const std::vector<size_t>& innerPerm: getAllPermutations(pairCount)) {
+        for (int transpositionSelection = 0; transpositionSelection < (1 << (pairCount)); ++transpositionSelection) {
             std::array<int, N> perm;
-            // TODO: consider optmising this loop out
-            for (size_t i = 0; i < N; ++i) {
-                perm[i] = i;
-            }
-            for (size_t j = 0; j < N/2; ++j) {
+            for (size_t j = 0; j < pairCount; ++j) {
                 if (((transpositionSelection >> j) & 1) == 0) { // jth bit 0
-                    //std::cout << matchings[j].first << " " << matchings[innerPerm[j]].first << "\n";
-                    //std::cout << "innerPerm: " << innerPerm[0] << " " << innerPerm[1] << " " << innerPerm[2] << "\n";
-                    perm[matchings[j].first] = matchings[innerPerm[j]].first;
-                    perm[matchings[j].second] = matchings[innerPerm[j]].second;
+                    perm[structure.pairs[j].first] = structure.pairs[innerPerm[j]].first;
+                    perm[structure.pairs[j].second] = structure.pairs[innerPerm[j]].second;
                 } else {
-                    perm[matchings[j].first] = matchings[innerPerm[j]].second;
-                    perm[matchings[j].second] = matchings[innerPerm[j]].first;
+                    perm[structure.pairs[j].first] = structure.pairs[innerPerm[j]].second;
+                    perm[structure.pairs[j].second] = structure.pairs[innerPerm[j]].first;
+                }
+            }
+            if (structure.fixedPoints.first != -1) {
+                if (structure.fixedPoints.second != -1) {
+                    std::array<int, N> perm2(perm);
+                    perm[structure.fixedPoints.first] = structure.fixedPoints.second;
+                    perm[structure.fixedPoints.second] = structure.fixedPoints.first;
+                    perm2[structure.fixedPoints.first] = structure.fixedPoints.first;
+                    perm2[structure.fixedPoints.second] = structure.fixedPoints.second;
+                    stabilizingPermutations.push_back(SymmetricGroupElement<N>(std::move(perm2)));
+                } else {
+                    perm[structure.fixedPoints.first] = structure.fixedPoints.first;
                 }
             }
             stabilizingPermutations.push_back(SymmetricGroupElement<N>(std::move(perm)));

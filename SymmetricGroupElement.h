@@ -111,7 +111,7 @@ public:
         return ans;
     }
 
-    bool operator==(const SymmetricGroupElement<N>& right) {
+    bool operator==(const SymmetricGroupElement<N>& right) const {
         for (int i = 0; i < N; ++i) {
             if (m_image[i] != right.m_image[i]) {
                 return false;
@@ -120,7 +120,7 @@ public:
         return true;
     }
 
-    bool operator!=(const SymmetricGroupElement<N>& right) {
+    bool operator!=(const SymmetricGroupElement<N>& right) const {
         return !(*this == right);
     }
 
@@ -178,7 +178,7 @@ public:
         return m_image;
     }
 
-    void printInternalArray() {
+    void printInternalArray() const {
         for (int num: m_image) {
             std::cout << num << ",";
         }

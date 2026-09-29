@@ -14,7 +14,7 @@ namespace {
         }
     }
 
-    bool areMatchingsEqual(const std::vector<std::pair<int,int>>& m1, const std::vector<std::pair<int,int>>& m2) {
+    bool arePairListsEqual(const std::vector<std::pair<int,int>>& m1, const std::vector<std::pair<int,int>>& m2) {
         if (m1.size() != m2.size()) {
             return false;
         }
@@ -32,7 +32,7 @@ namespace {
         return true;
     }
 
-    std::string matchingToString(const std::vector<std::pair<int,int>>& matching) {
+    std::string pairListToString(const std::vector<std::pair<int,int>>& matching) {
         std::ostringstream ss;
         ss << "[";
         for (const auto& [first, second]: matching) {
@@ -42,9 +42,9 @@ namespace {
         return ss.str();
     }
 
-    void assertMatchingsEqual(const std::vector<std::pair<int,int>>& m1, const std::vector<std::pair<int,int>>& m2) {
-        if (!areMatchingsEqual(m1, m2)) {
-            throw TestException("Matchings not equal. " + matchingToString(m1) + " != " + matchingToString(m2));
+    void assertPairListsEqual(const std::vector<std::pair<int,int>>& m1, const std::vector<std::pair<int,int>>& m2) {
+        if (!arePairListsEqual(m1, m2)) {
+            throw TestException("Matchings not equal. " + pairListToString(m1) + " != " + pairListToString(m2));
         }
     }
 }
@@ -58,45 +58,48 @@ void TestPermutationFinder() {
 
 void TestMinimalImageOfSingleInvolution() {
     SymmetricGroupElement inv1 = SymmetricGroupElement<6>("(0,1)(2,3)(4,5)");
-    ASSERT_PERMUTATIONS_EQUAL(getMinimalImageOfInvolution(inv1, 0), inv1);
+    assertPermutationsEqual(getMinimalImageOfInvolution(inv1, 0), inv1);
 
     SymmetricGroupElement inv2 = SymmetricGroupElement<6>("(0,5)(2,4)(1,3)");
-    ASSERT_PERMUTATIONS_EQUAL(getMinimalImageOfInvolution(inv2, 0), inv1);
+    assertPermutationsEqual(getMinimalImageOfInvolution(inv2, 0), inv1);
 
     SymmetricGroupElement inv3 = SymmetricGroupElement<7>("(3,5)(2,4)(0,6)");
-    ASSERT_PERMUTATIONS_EQUAL(getMinimalImageOfInvolution(inv3, 1), SymmetricGroupElement<7>("(1,2)(3,4)(5,6)"));
+    assertPermutationsEqual(getMinimalImageOfInvolution(inv3, 1), SymmetricGroupElement<7>("(1,2)(3,4)(5,6)"));
 
     SymmetricGroupElement inv4 = SymmetricGroupElement<8>("(1,5)(3,6)(0,7)");
-    ASSERT_PERMUTATIONS_EQUAL(getMinimalImageOfInvolution(inv4, 2), SymmetricGroupElement<8>("(2,3)(4,5)(6,7)"));
+    assertPermutationsEqual(getMinimalImageOfInvolution(inv4, 2), SymmetricGroupElement<8>("(2,3)(4,5)(6,7)"));
+}
+
+void TestGetInvolutionStructure() {
+    SymmetricGroupElement inv1 = SymmetricGroupElement<6>("(0,1)(2,3)(4,5)");
+    std::vector<std::pair<int,int>> pairs1 = getInvolutionStructure<6>(inv1.getInternalArray()).pairs;
+    std::vector<std::pair<int,int>> correctPairs1 = {{0,1},{2,3},{4,5}};
+    assertPairListsEqual(pairs1, correctPairs1);
+
+    SymmetricGroupElement inv2 = SymmetricGroupElement<6>("(2,4)(1,5)");
+    InvolutionStructure s2 = getInvolutionStructure<6>(inv2.getInternalArray());
+    std::vector<std::pair<int,int>> pairs2 = s2.pairs;
+    std::vector<std::pair<int,int>> correctPairs2 = {{1,5},{4,2}};
+    assertPairListsEqual(pairs2, correctPairs2);
+
+    SymmetricGroupElement inv3 = SymmetricGroupElement<7>("(0,4)(1,5)(2,6)");
+    std::vector<std::pair<int,int>> pairs3 = getInvolutionStructure<7>(inv3.getInternalArray()).pairs;
+    std::vector<std::pair<int,int>> correctPairs3 = {{1,5},{4,0},{6,2}};
+    assertPairListsEqual(pairs3, correctPairs3);
 }
 
 void TestGetInvolutionStabiliser() {
     SymmetricGroupElement inv1 = SymmetricGroupElement<6>("(0,1)(2,3)(4,5)");
-    std::vector<std::pair<int,int>> matchings1 = getMatchingsFromInvolution<6>(inv1.getInternalArray());
-    std::vector<std::pair<int,int>> correctMatchings1 = {{0,1},{2,3},{4,5}};
-    assertMatchingsEqual(matchings1, correctMatchings1);
-
     SymmetricGroupElement inv2 = SymmetricGroupElement<6>("(2,4)(1,5)");
-    std::vector<std::pair<int,int>> matchings2 = getMatchingsFromInvolution<6>(inv2.getInternalArray());
-    std::vector<std::pair<int,int>> correctMatchings2 = {{1,5},{4,2},{0,3}};
-    assertMatchingsEqual(matchings2, correctMatchings2);
-
     SymmetricGroupElement inv3 = SymmetricGroupElement<7>("(0,4)(1,5)(2,6)");
-    std::vector<std::pair<int,int>> matchings3 = getMatchingsFromInvolution<7>(inv3.getInternalArray());
-    std::vector<std::pair<int,int>> correctMatchings3 = {{1,5},{4,0},{6,2}};
-    assertMatchingsEqual(matchings3, correctMatchings3);
+    SymmetricGroupElement inv4 = SymmetricGroupElement<11>("(0,1)(2,3)(4,5)(6,7)(8,9)");
 
-    std::vector<SymmetricGroupElement<6>> stab = getInvolutionStabilizer(inv1);
-    std::cout << listOfPermutationsToString(stab) << "\n";
-    std::cout << matchingToString(matchings1) << "\n";
-    if (stab.size() != 8 * 6) {
-        throw TestException("Stabilizer should have 48 elements.");
-    }
-    for (const auto& perm: stab) {
-        if (perm * inv1 != inv1 * perm) {
-            throw TestException(perm.toString() + " does not commute with " + inv1.toString() + ".");
-            break;
-        }
-    }
-    //std::cout << listOfPermutationsToString(stab) << "\n";
+    std::vector<SymmetricGroupElement<6>> stab1 = getInvolutionStabilizer(inv1);
+    assertStabilizerValidity(inv1, stab1, 6 * 8);
+    std::vector<SymmetricGroupElement<6>> stab2 = getInvolutionStabilizer(inv2);
+    assertStabilizerValidity(inv2, stab2, 2 * 4 * 2);
+    std::vector<SymmetricGroupElement<7>> stab3 = getInvolutionStabilizer(inv3);
+    assertStabilizerValidity(inv3, stab3, 6 * 8);
+    std::vector<SymmetricGroupElement<11>> stab4 = getInvolutionStabilizer(inv4);
+    assertStabilizerValidity(inv4, stab4, 120 * 32);
 }
