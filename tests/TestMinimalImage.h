@@ -5,6 +5,7 @@ void TestMinimalImageOfSingleInvolution();
 void TestPermutationFinder();
 void TestGetInvolutionStructure();
 void TestGetInvolutionStabiliser();
+void TestIsMinimalCheckOfinvolutionSet();
 
 class TestMinimalImage : public TestSuite {
 public:
@@ -13,5 +14,6 @@ public:
         AddToTestSuite(TestMinimalImageOfSingleInvolution);
         AddToTestSuite(TestGetInvolutionStructure);
         AddToTestSuite(TestGetInvolutionStabiliser);
+        AddToTestSuite(TestIsMinimalCheckOfinvolutionSet);
     }
 };

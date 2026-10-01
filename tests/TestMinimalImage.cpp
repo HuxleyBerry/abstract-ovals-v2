@@ -103,3 +103,24 @@ void TestGetInvolutionStabiliser() {
     std::vector<SymmetricGroupElement<11>> stab4 = getInvolutionStabilizer(inv4);
     assertStabilizerValidity(inv4, stab4, 120 * 32);
 }
+
+void TestIsMinimalCheckOfinvolutionSet() {
+    std::vector<SymmetricGroupElement<3>> invSet1 = { SymmetricGroupElement<3>("(0,1)") };
+    std::vector<SymmetricGroupElement<3>> invSet2 = { SymmetricGroupElement<3>("(1,2)") };
+    /*if (isSetOfInvolutionsMinimal(invSet1, 1)) {
+        throw TestException("involution set should not be minimal");
+    }
+    if (!isSetOfInvolutionsMinimal(invSet2, 1)) {
+        throw TestException("involution set should be minimal");
+    }*/
+    std::vector<SymmetricGroupElement<3>> invSet3 = { SymmetricGroupElement<3>("(1,2)"), SymmetricGroupElement<3>("(0,2)") };
+    std::vector<SymmetricGroupElement<3>> invSet4 = { SymmetricGroupElement<3>("(1,2)"), SymmetricGroupElement<3>("(0,1)") };
+    assertPermutationSetIsOrdered(invSet3);
+    assertPermutationSetIsOrdered(invSet4);
+    /*if (isSetOfInvolutionsMinimal(invSet3, 1)) {
+        throw TestException("involution set" + listOfPermutationsToString(invSet3) + " should not be minimal");
+    }*/
+    if (!isSetOfInvolutionsMinimal(invSet4, 1)) {
+        throw TestException("involution set" + listOfPermutationsToString(invSet4) + " should be minimal");
+    }
+}

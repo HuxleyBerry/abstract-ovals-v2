@@ -81,6 +81,42 @@ std::vector<SymmetricGroupElement<N>> getConjugacyClass(const SymmetricGroupElem
 
 
 template <size_t N>
+bool operator<(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
+    const std::array<int, N>& leftArray = left.getInternalArray();
+    const std::array<int, N>& rightArray = right.getInternalArray();
+    for (int i = 0; i < N; ++i) {
+        if (leftArray[i] < rightArray[i]) {
+            return true;
+        } else if (leftArray[i] > rightArray[i]) {
+            return false;
+        }
+    }
+    return false;
+}
+
+template <size_t N>
+bool operator<=(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
+    const std::array<int, N>& leftArray = left.getInternalArray();
+    const std::array<int, N>& rightArray = right.getInternalArray();
+    for (int i = 0; i < N; ++i) {
+        if (leftArray[i] != rightArray[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template <size_t N>
+bool operator>(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
+    return !(left <= right);
+}
+
+template <size_t N>
+bool operator>=(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
+    return !(left < right);
+}
+
+template <size_t N>
 std::string listOfPermutationsToString(const std::vector<SymmetricGroupElement<N>>& list) {
     std::string ans = "{ ";
     for (int i = 0; i < list.size(); ++i) {

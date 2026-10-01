@@ -5,6 +5,7 @@
 #include <array>
 #include <utility>
 #include <cstdint>
+#include <optional>
 #include "../SymmetricGroupElement.h"
 
 std::vector<std::vector<size_t>> getAllPermutations(int permSize);
@@ -76,6 +77,17 @@ std::vector<SymmetricGroupElement<N>> getInvolutionStabilizer(const SymmetricGro
     return stabilizingPermutations;
 }
 
+template <size_t N>
+std::vector<SymmetricGroupElement<N>> getInvolutionStabilizerGivenGroup(const SymmetricGroupElement<N>& inv, const std::vector<SymmetricGroupElement<N>>& listOfAllGroupElements) {
+    std::vector<SymmetricGroupElement<N>> stab;
+    for (const SymmetricGroupElement<N>& el : listOfAllGroupElements) {
+        if (el * inv == inv * el) {
+            stab.push_back(el);
+        }
+    }
+    return stab;
+}
+
 // Assumes involution has either zero, one, or two fixed points.
 // finds the minimal member of the orbit of the given involution under the conjugation action of
 // S_N. The notion of "minimal" uses an ordering on the permutation of S_N which is just tuple
@@ -93,6 +105,81 @@ SymmetricGroupElement<N> getMinimalImageOfInvolution(const SymmetricGroupElement
         perm[i + 1] = i;
     }
     return SymmetricGroupElement<N>(std::move(perm));
+}
+
+namespace {
+    enum class MinimalStatus {
+        NotMinimal,
+        Undetermined
+    };
+}
+
+// If indexIntoPermutation is i, it means we are evaluating a candidate for the ith coordinate at this poit in the recursive process
+template <size_t N>
+MinimalStatus isSetOfInvolutionsMinimalHelper(const std::vector<SymmetricGroupElement<N>>& involutions, int fixedPointCount, std::vector<bool>& isIncludedInPermutation, std::vector<size_t>& partialPermutation, int indexIntoPermutation, std::vector<std::vector<SymmetricGroupElement<N>>>& pointwiseStabilisers) {
+    std::cout << indexIntoPermutation << "\n";
+    if (indexIntoPermutation != -1) {
+        SymmetricGroupElement<N> minimalRelevantElement;
+        // todo remove
+        std::optional<SymmetricGroupElement<N>> bestGroupEl = std::nullopt;
+        if (indexIntoPermutation == 0) {
+            minimalRelevantElement = getMinimalImageOfInvolution(involutions[partialPermutation[indexIntoPermutation]], fixedPointCount);
+        } else {
+            if (pointwiseStabilisers.size() <= indexIntoPermutation - 1) {
+                if (indexIntoPermutation == 1) {
+                    pointwiseStabilisers.push_back(getInvolutionStabilizer(involutions[0]));
+                } else {
+                    pointwiseStabilisers.push_back(getInvolutionStabilizerGivenGroup(involutions[indexIntoPermutation], pointwiseStabilisers[indexIntoPermutation - 2]));
+                }
+            }
+            bool flag = true;
+            std::cout << "the permutation is: " << partialPermutation[0] << " " << partialPermutation[1] << "\n";
+            std::cout << "the stabilizer is: " << listOfPermutationsToString(pointwiseStabilisers[indexIntoPermutation - 1]) << "\n";
+            for (const SymmetricGroupElement<N>& el : pointwiseStabilisers[indexIntoPermutation - 1]) {
+                const SymmetricGroupElement<N> image = congjugate(involutions[partialPermutation[indexIntoPermutation]], el);
+                std::cout << "Conjugating " << involutions[partialPermutation[indexIntoPermutation]].toString() << " by " << el.toString() << " resulted in " << image.toString() << "\n";
+                if (flag || image < minimalRelevantElement) {
+                    minimalRelevantElement = image;
+                    bestGroupEl = el;
+                }
+                flag = false;
+            }
+        }
+        if (minimalRelevantElement < involutions[indexIntoPermutation]) {
+            std::cout << "found not minimal: " << minimalRelevantElement.toString() << " < " << involutions[indexIntoPermutation].toString() << "\n";
+            if (bestGroupEl.has_value()) {
+                std::cout << "g: " << bestGroupEl.value().toString() << "\n";
+            }
+            return MinimalStatus::NotMinimal;
+        } else if (minimalRelevantElement > involutions[indexIntoPermutation]) {
+            std::cout << "found undetermined\n";
+            return MinimalStatus::Undetermined;
+        }
+    }
+    for (int i = 0; i < involutions.size(); ++i) {
+        if (!isIncludedInPermutation[i]) {
+            isIncludedInPermutation[i] = true;
+            std::cout << "adding " << i << "to index " << indexIntoPermutation + 1 << " of partial permutation\n";
+            partialPermutation[indexIntoPermutation + 1] = i;
+            MinimalStatus status = isSetOfInvolutionsMinimalHelper(involutions, fixedPointCount, isIncludedInPermutation, partialPermutation, indexIntoPermutation + 1, pointwiseStabilisers);
+            if (status == MinimalStatus::NotMinimal) {
+                return MinimalStatus::NotMinimal;
+            }
+            isIncludedInPermutation[i] = false;
+        }
+    }
+    return MinimalStatus::Undetermined;
+}
+
+// Assumes the vector is sorted.
+// Returns true if the set of involutions is minimal (lexicographically) in its orbit with respect
+// to the conjugation action of the whole of S_N.
+template <size_t N>
+bool isSetOfInvolutionsMinimal(const std::vector<SymmetricGroupElement<N>>& involutions, int fixedPointCount) {
+    std::vector<std::vector<SymmetricGroupElement<N>>> pointwiseStabilizers;
+    std::vector<bool> isIncludedInPermutation(involutions.size(), false);
+    std::vector<size_t> partialPermutation(involutions.size());
+    return isSetOfInvolutionsMinimalHelper(involutions, fixedPointCount, isIncludedInPermutation, partialPermutation, -1, pointwiseStabilizers) != MinimalStatus::NotMinimal;
 }
 
 #endif
