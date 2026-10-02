@@ -17,3 +17,15 @@ void TestComparison() {
     assertPermutationOrdering(s2, s1);
     assertPermutationOrdering(s2, s3);
 }
+
+void TestMultiplication() {
+    SymmetricGroupElement<3> s1("()");
+    SymmetricGroupElement<3> s2("()");
+    assertPermutationEquality(s1 * s2, s2);
+}
+
+void TestConjugation() {
+    SymmetricGroupElement<3> s1("(1,2)");
+    SymmetricGroupElement<3> s2("(0,1,2)");
+    assertPermutationEquality(congjugate(s1, s2), SymmetricGroupElement<3>("(0,2)"));
+}

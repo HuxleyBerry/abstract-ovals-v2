@@ -127,20 +127,20 @@ public:
     friend SymmetricGroupElement<N> operator* <> (const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right);
     SymmetricGroupElement<N>& operator*=(const SymmetricGroupElement<N>& right) {
         *this = *this * right;
-        return this;
+        return *this;
     }
 
     SymmetricGroupElement<N>& invert() {
-        std::array<int, N> ans = std::array<int, N>();
-        for (int i = 0; i < N; ++i) {
-            ans[m_image[i]] = i;
-        }
+        *this = this->inverse();
         return *this;
     }
 
     SymmetricGroupElement<N> inverse() const {
-        SymmetricGroupElement<N> copy(*this);
-        return copy.invert();
+        std::array<int, N> ans = std::array<int, N>();
+        for (int i = 0; i < N; ++i) {
+            ans[m_image[i]] = i;
+        }
+        return SymmetricGroupElement(ans);
     }
 
     std::vector<int> getCycleStructure() const {

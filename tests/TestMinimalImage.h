@@ -2,6 +2,7 @@
 #include "../orderly/MinimalImage.h"
 
 void TestMinimalImageOfSingleInvolution();
+void TestMinimalImageOfSingleInvolutionWithGroupElementFinder();
 void TestPermutationFinder();
 void TestGetInvolutionStructure();
 void TestGetInvolutionStabiliser();
@@ -12,6 +13,7 @@ public:
     TestMinimalImage() {
         AddToTestSuite(TestPermutationFinder);
         AddToTestSuite(TestMinimalImageOfSingleInvolution);
+        AddToTestSuite(TestMinimalImageOfSingleInvolutionWithGroupElementFinder);
         AddToTestSuite(TestGetInvolutionStructure);
         AddToTestSuite(TestGetInvolutionStabiliser);
         AddToTestSuite(TestIsMinimalCheckOfinvolutionSet);

@@ -70,6 +70,19 @@ void TestMinimalImageOfSingleInvolution() {
     assertPermutationsEqual(getMinimalImageOfInvolution(inv4, 2), SymmetricGroupElement<8>("(2,3)(4,5)(6,7)"));
 }
 
+void TestMinimalImageOfSingleInvolutionWithGroupElementFinder() {
+    SymmetricGroupElement inv1 = SymmetricGroupElement<6>("(0,1)(2,3)(4,5)");
+    SymmetricGroupElement inv2 = SymmetricGroupElement<6>("(0,5)(2,4)(1,3)");
+    const auto [minimal, achievingGroupElement] = (getMinimalImageOfInvolutionWithGroupElement(inv2));
+    assertPermutationsEqual(minimal, inv1);
+    assertPermutationsEqual(minimal, congjugate(inv2, achievingGroupElement));
+
+    SymmetricGroupElement inv3 = SymmetricGroupElement<3>("(1,2)");
+    const auto [minimal2, achievingGroupElement2] = (getMinimalImageOfInvolutionWithGroupElement(inv3));
+    assertPermutationsEqual(minimal2, inv3);
+    assertPermutationsEqual(minimal2, congjugate(inv3, achievingGroupElement2));
+}
+
 void TestGetInvolutionStructure() {
     SymmetricGroupElement inv1 = SymmetricGroupElement<6>("(0,1)(2,3)(4,5)");
     std::vector<std::pair<int,int>> pairs1 = getInvolutionStructure<6>(inv1.getInternalArray()).pairs;
@@ -107,20 +120,20 @@ void TestGetInvolutionStabiliser() {
 void TestIsMinimalCheckOfinvolutionSet() {
     std::vector<SymmetricGroupElement<3>> invSet1 = { SymmetricGroupElement<3>("(0,1)") };
     std::vector<SymmetricGroupElement<3>> invSet2 = { SymmetricGroupElement<3>("(1,2)") };
-    /*if (isSetOfInvolutionsMinimal(invSet1, 1)) {
+    if (isSetOfInvolutionsMinimal(invSet1)) {
         throw TestException("involution set should not be minimal");
     }
-    if (!isSetOfInvolutionsMinimal(invSet2, 1)) {
+    if (!isSetOfInvolutionsMinimal(invSet2)) {
         throw TestException("involution set should be minimal");
-    }*/
+    }
     std::vector<SymmetricGroupElement<3>> invSet3 = { SymmetricGroupElement<3>("(1,2)"), SymmetricGroupElement<3>("(0,2)") };
     std::vector<SymmetricGroupElement<3>> invSet4 = { SymmetricGroupElement<3>("(1,2)"), SymmetricGroupElement<3>("(0,1)") };
     assertPermutationSetIsOrdered(invSet3);
     assertPermutationSetIsOrdered(invSet4);
-    /*if (isSetOfInvolutionsMinimal(invSet3, 1)) {
+    if (isSetOfInvolutionsMinimal(invSet3)) {
         throw TestException("involution set" + listOfPermutationsToString(invSet3) + " should not be minimal");
-    }*/
-    if (!isSetOfInvolutionsMinimal(invSet4, 1)) {
+    }
+    if (!isSetOfInvolutionsMinimal(invSet4)) {
         throw TestException("involution set" + listOfPermutationsToString(invSet4) + " should be minimal");
     }
 }
