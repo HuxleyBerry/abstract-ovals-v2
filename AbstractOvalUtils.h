@@ -30,7 +30,7 @@ template <int order>
 std::vector<SymmetricGroupElement<order + 1>> getAbstractOvalCandidatePermutations() {
     if (order%2 == 0) {
         // we skip the identity permutation;
-        std::array<int, order + 1> permArray;
+        std::array<size_t, order + 1> permArray;
         permArray[order] = order;
         for (int i = 0; i < order/2; ++i) {
             permArray[2 * i] = 2 * i + 1;
@@ -39,7 +39,7 @@ std::vector<SymmetricGroupElement<order + 1>> getAbstractOvalCandidatePermutatio
         SymmetricGroupElement<order + 1> representative(std::move(permArray));
         return getConjugacyClass(representative);
     } else {
-        std::array<int, order + 1> permArray;
+        std::array<size_t, order + 1> permArray;
         for (int i = 0; i < (order+1)/2; ++i) {
             permArray[2 * i] = 2 * i + 1;
             permArray[2 * i + 1] = 2 * i;

@@ -25,9 +25,9 @@ public:
         }
     }
 
-    SymmetricGroupElement<N>(const std::array<int, N>& images): m_image(images) {}
+    SymmetricGroupElement<N>(const std::array<size_t, N>& images): m_image(images) {}
 
-    SymmetricGroupElement<N>(std::array<int, N>&& images): m_image(std::move(images)) {}
+    SymmetricGroupElement<N>(std::array<size_t, N>&& images): m_image(std::move(images)) {}
 
     SymmetricGroupElement(const std::string& stringForm) {
         for (int i = 0; i < N; ++i) {
@@ -136,8 +136,8 @@ public:
     }
 
     SymmetricGroupElement<N> inverse() const {
-        std::array<int, N> ans = std::array<int, N>();
-        for (int i = 0; i < N; ++i) {
+        std::array<size_t, N> ans;
+        for (size_t i = 0; i < N; ++i) {
             ans[m_image[i]] = i;
         }
         return SymmetricGroupElement(ans);
@@ -174,7 +174,7 @@ public:
         return m_image[p];
     }
 
-    const std::array<int, N>& getInternalArray() const {
+    const std::array<size_t, N>& getInternalArray() const {
         return m_image;
     }
 
@@ -186,13 +186,13 @@ public:
     }
 
 private:
-    std::array<int, N> m_image;
+    std::array<size_t, N> m_image;
 };
 
 // acting from the left
 template <size_t N>
 SymmetricGroupElement<N> operator*(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
-    std::array<int, N> ans = std::array<int, N>();
+    std::array<size_t, N> ans;
     for (int i = 0; i < N; ++i) {
         ans[i] = left.m_image[right.m_image[i]];
     }

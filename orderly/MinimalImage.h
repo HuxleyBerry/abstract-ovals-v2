@@ -6,6 +6,7 @@
 #include <utility>
 #include <cstdint>
 #include <optional>
+#include <algorithm>
 #include <tuple>
 #include "../SymmetricGroupElement.h"
 
@@ -17,7 +18,7 @@ struct InvolutionStructure {
 };
 
 template <size_t N>
-InvolutionStructure getInvolutionStructure(const std::array<int, N>& arrayRep) {
+InvolutionStructure getInvolutionStructure(const std::array<size_t, N>& arrayRep) {
     std::vector<std::pair<int,int>> pairs;
     std::uint16_t bitset = 0;
     int firstFixed = -1;
@@ -50,7 +51,7 @@ std::vector<SymmetricGroupElement<N>> getInvolutionStabilizer(const SymmetricGro
     size_t pairCount = structure.pairs.size();
     for (const std::vector<size_t>& innerPerm: getAllPermutations(pairCount)) {
         for (int transpositionSelection = 0; transpositionSelection < (1 << (pairCount)); ++transpositionSelection) {
-            std::array<int, N> perm;
+            std::array<size_t, N> perm;
             for (size_t j = 0; j < pairCount; ++j) {
                 if (((transpositionSelection >> j) & 1) == 0) { // jth bit 0
                     perm[structure.pairs[j].first] = structure.pairs[innerPerm[j]].first;
@@ -62,7 +63,7 @@ std::vector<SymmetricGroupElement<N>> getInvolutionStabilizer(const SymmetricGro
             }
             if (structure.fixedPoints.first != -1) {
                 if (structure.fixedPoints.second != -1) {
-                    std::array<int, N> perm2(perm);
+                    std::array<size_t, N> perm2(perm);
                     perm[structure.fixedPoints.first] = structure.fixedPoints.second;
                     perm[structure.fixedPoints.second] = structure.fixedPoints.first;
                     perm2[structure.fixedPoints.first] = structure.fixedPoints.first;
@@ -95,7 +96,7 @@ std::vector<SymmetricGroupElement<N>> getInvolutionStabilizerGivenGroup(const Sy
 // comparison of the array representation of the permutation.
 template <size_t N>
 SymmetricGroupElement<N> getMinimalImageOfInvolution(const SymmetricGroupElement<N>& inv, int fixedPointCount) {
-    std::array<int, N> perm;
+    std::array<size_t, N> perm;
     int startOfNotFixed = 0;
     for (int i = 0; i < fixedPointCount; ++i) {
         perm[i] = i;
@@ -112,8 +113,8 @@ SymmetricGroupElement<N> getMinimalImageOfInvolution(const SymmetricGroupElement
 // returns a pair (g,h) such that inv^h = g.
 template <size_t N>
 std::pair<SymmetricGroupElement<N>,SymmetricGroupElement<N>> getMinimalImageOfInvolutionWithGroupElement(const SymmetricGroupElement<N>& inv) {
-    std::array<int, N> arrayForMinimal;
-    std::array<int, N> arrayForPermutationAchievingMinimal;
+    std::array<size_t, N> arrayForMinimal;
+    std::array<size_t, N> arrayForPermutationAchievingMinimal;
     InvolutionStructure structure = getInvolutionStructure(inv.getInternalArray());
     int startOfNotFixed = 0;
     if (structure.fixedPoints.first != -1) {
@@ -152,9 +153,9 @@ MinimalStatus isSetOfInvolutionsMinimalHelper(const std::vector<SymmetricGroupEl
     //std::cout << indexIntoPermutation << "\n";
     SymmetricGroupElement<N> newMinimumAchievingGroupElement("()");
     if (indexIntoPermutation != -1) {
-        SymmetricGroupElement<N> minimalRelevantElement;
+        SymmetricGroupElement<N> minimumInOrbit;
         if (indexIntoPermutation == 0) {
-            std::tie(minimalRelevantElement, newMinimumAchievingGroupElement) = getMinimalImageOfInvolutionWithGroupElement(involutions[partialPermutation[indexIntoPermutation]]);
+            std::tie(minimumInOrbit, newMinimumAchievingGroupElement) = getMinimalImageOfInvolutionWithGroupElement(involutions[partialPermutation[indexIntoPermutation]]);
         } else {
             if (pointwiseStabilisers.size() <= indexIntoPermutation - 1) {
                 if (indexIntoPermutation == 1) {
@@ -171,18 +172,18 @@ MinimalStatus isSetOfInvolutionsMinimalHelper(const std::vector<SymmetricGroupEl
                 const SymmetricGroupElement<N> leftCosetMember = minimumAchievingGroupElement * stabilizerElement;
                 const SymmetricGroupElement<N> image = congjugate(involutions[partialPermutation[indexIntoPermutation]], leftCosetMember);
                 //std::cout << "Conjugating " << involutions[partialPermutation[indexIntoPermutation]].toString() << " by " << leftCosetMember.toString() << " resulted in " << image.toString() << "\n";
-                if (flag || image < minimalRelevantElement) {
-                    minimalRelevantElement = image;
+                if (flag || image < minimumInOrbit) {
+                    minimumInOrbit = image;
                     bestGroupElement = leftCosetMember;
                 }
                 flag = false;
             }
             newMinimumAchievingGroupElement = bestGroupElement;
         }
-        if (minimalRelevantElement < involutions[indexIntoPermutation]) {
-            //std::cout << "found not minimal: " << minimalRelevantElement.toString() << " < " << involutions[indexIntoPermutation].toString() << "\n";
+        if (minimumInOrbit < involutions[indexIntoPermutation]) {
+            //std::cout << "found not minimal: " << minimumInOrbit.toString() << " < " << involutions[indexIntoPermutation].toString() << "\n";
             return MinimalStatus::NotMinimal;
-        } else if (minimalRelevantElement > involutions[indexIntoPermutation]) {
+        } else if (minimumInOrbit > involutions[indexIntoPermutation]) {
             //std::cout << "found undetermined\n";
             return MinimalStatus::Undetermined;
         }
@@ -212,6 +213,12 @@ bool isSetOfInvolutionsMinimal(const std::vector<SymmetricGroupElement<N>>& invo
     std::vector<bool> isIncludedInPermutation(involutions.size(), false);
     std::vector<size_t> partialPermutation(involutions.size());
     return isSetOfInvolutionsMinimalHelper(involutions, isIncludedInPermutation, partialPermutation, -1, pointwiseStabilizers, SymmetricGroupElement<N>("()")) != MinimalStatus::NotMinimal;
+}
+
+template <size_t N>
+bool isUnsortedSetOfInvolutionsMinimal(std::vector<SymmetricGroupElement<N>> involutions) {
+    std::sort(involutions.begin(), involutions.end());
+    return isSetOfInvolutionsMinimal<N>(involutions);
 }
 
 #endif

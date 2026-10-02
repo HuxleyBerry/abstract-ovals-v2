@@ -2,8 +2,9 @@
 #include "SymmetricGroupTestUtils.h"
 #include "../SymmetricGroupUtils.h"
 #include <string>
-#include <set>
 #include <sstream>
+#include <algorithm>
+#include <utility>
 
 namespace {
     int pairToInt(const std::pair<int,int>& p, int base) {
@@ -117,7 +118,7 @@ void TestGetInvolutionStabiliser() {
     assertStabilizerValidity(inv4, stab4, 120 * 32);
 }
 
-void TestIsMinimalCheckOfinvolutionSet() {
+void TestIsMinimalCheckOfinvolutionSetBasicExamples() {
     std::vector<SymmetricGroupElement<3>> invSet1 = { SymmetricGroupElement<3>("(0,1)") };
     std::vector<SymmetricGroupElement<3>> invSet2 = { SymmetricGroupElement<3>("(1,2)") };
     if (isSetOfInvolutionsMinimal(invSet1)) {
@@ -135,5 +136,19 @@ void TestIsMinimalCheckOfinvolutionSet() {
     }
     if (!isSetOfInvolutionsMinimal(invSet4)) {
         throw TestException("involution set" + listOfPermutationsToString(invSet4) + " should be minimal");
+    }
+}
+
+void TestIsMinimalCheckOfinvolutionSetMatchesNaiveAlgorithmResult() {
+    std::vector<SymmetricGroupElement<6>> invSet = { SymmetricGroupElement<6>("(0,3)(2,4)(1,5)"),
+                                                     SymmetricGroupElement<6>("(0,5)(2,3)(1,4)"),
+                                                     SymmetricGroupElement<6>("(0,1)(2,5)(3,4)"),
+                                                     SymmetricGroupElement<6>("(0,2)(1,4)(3,5)") };
+
+    std::vector<std::vector<size_t>> allPermutations = getAllPermutations(6);
+    for (const std::vector<size_t>& perm: allPermutations) {
+        std::array<size_t, 6> permArray;
+        std::copy(perm.cbegin(), perm.cend(), permArray.begin());
+        SymmetricGroupElement<6> groupElement(std::move(permArray));
     }
 }

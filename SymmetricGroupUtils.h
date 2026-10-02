@@ -8,11 +8,11 @@
 namespace {
 
     template <size_t N>
-    void getConjugacyClassHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<int, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int firstPointInMostRecentCycle);
+    void getConjugacyClassHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<size_t, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int firstPointInMostRecentCycle);
 
     // TODO: avoid repeating when multiple of same cycle size
     template <size_t N>
-    void addAllCyclesToPartialHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<int, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int cycleProgress, int prevCycleElement, int firstCycleElement, int firstPointInMostRecentCycle) {
+    void addAllCyclesToPartialHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<size_t, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int cycleProgress, int prevCycleElement, int firstCycleElement, int firstPointInMostRecentCycle) {
         int cycleSize = cycleSizes[indexIntoCycleSizes];
         if (cycleProgress == cycleSize) {
             // we've finished adding a cycle, so now we recurse onto the next cycles.
@@ -53,7 +53,7 @@ namespace {
     }
 
     template <size_t N>
-    void getConjugacyClassHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<int, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int firstPointInMostRecentCycle) {
+    void getConjugacyClassHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<size_t, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int firstPointInMostRecentCycle) {
         if (indexIntoCycleSizes < cycleSizes.size()) {
             addAllCyclesToPartialHelper<N>(output, partialPermutation, cycleSizes, indexIntoCycleSizes, alreadyIncludedInPermutation, 0, -1, 0, firstPointInMostRecentCycle);
         } else {
@@ -68,7 +68,7 @@ std::vector<SymmetricGroupElement<N>> getConjugacyClass(const SymmetricGroupElem
     //TODO: consider using a bitset instead, Or just uint16_t
     std::array<bool, N> alreadyIncludedInCycle;
     alreadyIncludedInCycle.fill(false);
-    std::array<int, N> partialPermutation;
+    std::array<size_t, N> partialPermutation;
     // set up partial permutation to fix each point by default
     for (int i = 0; i < N; ++i) {
         partialPermutation[i] = i;
@@ -82,8 +82,8 @@ std::vector<SymmetricGroupElement<N>> getConjugacyClass(const SymmetricGroupElem
 
 template <size_t N>
 bool operator<(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
-    const std::array<int, N>& leftArray = left.getInternalArray();
-    const std::array<int, N>& rightArray = right.getInternalArray();
+    const std::array<size_t, N>& leftArray = left.getInternalArray();
+    const std::array<size_t, N>& rightArray = right.getInternalArray();
     for (int i = 0; i < N; ++i) {
         if (leftArray[i] < rightArray[i]) {
             return true;
@@ -96,8 +96,8 @@ bool operator<(const SymmetricGroupElement<N>& left, const SymmetricGroupElement
 
 template <size_t N>
 bool operator<=(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
-    const std::array<int, N>& leftArray = left.getInternalArray();
-    const std::array<int, N>& rightArray = right.getInternalArray();
+    const std::array<size_t, N>& leftArray = left.getInternalArray();
+    const std::array<size_t, N>& rightArray = right.getInternalArray();
     for (int i = 0; i < N; ++i) {
         if (leftArray[i] != rightArray[i]) {
             return false;
