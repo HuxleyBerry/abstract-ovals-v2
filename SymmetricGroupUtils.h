@@ -10,7 +10,6 @@ namespace {
     template <size_t N>
     void getConjugacyClassHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<size_t, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int firstPointInMostRecentCycle);
 
-    // TODO: avoid repeating when multiple of same cycle size
     template <size_t N>
     void addAllCyclesToPartialHelper(std::vector<SymmetricGroupElement<N>>& output, std::array<size_t, N>& partialPermutation, const std::vector<int>& cycleSizes, size_t indexIntoCycleSizes, std::array<bool, N>& alreadyIncludedInPermutation, int cycleProgress, int prevCycleElement, int firstCycleElement, int firstPointInMostRecentCycle) {
         int cycleSize = cycleSizes[indexIntoCycleSizes];
@@ -65,7 +64,7 @@ namespace {
 template <size_t N>
 std::vector<SymmetricGroupElement<N>> getConjugacyClass(const SymmetricGroupElement<N>& el) { // conjugacy class in symmetric group
     std::vector<SymmetricGroupElement<N>> output;
-    //TODO: consider using a bitset instead, Or just uint16_t
+    // TODO: consider using a bitset instead, Or just uint16_t
     std::array<bool, N> alreadyIncludedInCycle;
     alreadyIncludedInCycle.fill(false);
     std::array<size_t, N> partialPermutation;

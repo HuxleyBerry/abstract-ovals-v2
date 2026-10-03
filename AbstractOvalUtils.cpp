@@ -7,7 +7,7 @@ std::vector<FourPoints> getPointCombinationsForAbstractOval(int order) {
             for (int k = i + 1; k <= order; ++k) {
                 for (int n = k; n <= order; ++n) {
                     // if the order is even, we skip quadruples that would be covered by
-                    // the identity permutation
+                    // the identity permutation.
                     if (order%2 == 0 && i == j && k == n) continue;
                     if (k != j && n != j) {
                         ans.emplace_back(i,j,k,n);

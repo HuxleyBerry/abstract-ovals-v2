@@ -1,32 +1,40 @@
 CXX := g++
-CXXFLAGS := -O3 -std=c++17
+CXXFLAGS := -O3 -std=c++17 -MMD -MP
 
-PROGRAM_SOURCES := \
+SHARED_SOURCES := \
 	AbstractOvalUtils.cpp \
-	AbstractOvalUtils.h \
-	SymmetricGroupElement.h \
-	SymmetricGroupUtils.h \
 	exact-cover-solvers/dancing-links.cpp \
-	exact-cover-solvers/dancing-links.h \
-	AbstractOvalFinder.h \
 	AbstractOvalFinder.cpp \
-	orderly/MinimalImage.h \
 	orderly/MinimalImage.cpp
 
+PROGRAM_SOURCES := \
+	$(SHARED_SOURCES) \
+	program.cpp
+
 TEST_SOURCES := \
-	$(PROGRAM_SOURCES) \
-	$(wildcard tests/*.cpp) \
-	$(wildcard tests/*.h) \
+	$(SHARED_SOURCES) \
+	$(wildcard tests/*.cpp)
+
+PROGRAM_OBJECTS := $(PROGRAM_SOURCES:.cpp=.o)
+TEST_OBJECTS := $(TEST_SOURCES:.cpp=.o)
 
 all: program tests
 
 tests: run-tests
 
-program: $(PROGRAM_SOURCES) program.cpp
-	$(CXX) $(CXXFLAGS) program.cpp $(filter %.cpp,$(PROGRAM_SOURCES)) -o $@
+program: $(PROGRAM_OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 
-run-tests: $(TEST_SOURCES)
-	$(CXX) $(CXXFLAGS) $(filter %.cpp,$(TEST_SOURCES)) -o $@
+run-tests: $(TEST_OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
 	rm -f run-tests program
+	find . -name '*.o' -delete
+	find . -name '*.d' -delete
+
+-include $(PROGRAM_OBJECTS:.o=.d)
+-include $(TEST_OBJECTS:.o=.d)
