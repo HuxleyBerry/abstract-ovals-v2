@@ -5,7 +5,7 @@ SHARED_SOURCES := \
 	AbstractOvalUtils.cpp \
 	exact-cover-solvers/dancing-links.cpp \
 	AbstractOvalFinder.cpp \
-	orderly/MinimalImage.cpp
+	orderly/MinimalImageUtils.cpp
 
 PROGRAM_SOURCES := \
 	$(SHARED_SOURCES) \

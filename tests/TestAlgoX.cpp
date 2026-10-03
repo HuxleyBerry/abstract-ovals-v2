@@ -1,7 +1,5 @@
-#include <cassert>
 #include <vector>
 #include <iostream>
-#include <stdexcept>
 #include <string>
 #include <set>
 #include <sstream>
@@ -22,13 +20,13 @@ std::string vectorToString(std::vector<int> v) {
 
 void assertSolutionListCorrect(const std::vector<std::vector<int>>& toTest, const std::vector<std::vector<int>>& expected) {
     if (toTest.size() != expected.size()) {
-        throw std::runtime_error("Did not have the expected solution count of "s + std::to_string(expected.size()));
+        throw TestException("Did not have the expected solution count of "s + std::to_string(expected.size()));
     }
     //inefficient, but it works
     std::set<std::vector<int>> toTestAsSet(toTest.cbegin(), toTest.cend());
     for (const std::vector<int> sol : expected) {
         if (toTestAsSet.count(sol) == 0) {
-            throw std::runtime_error("Solution "s + vectorToString(sol) + " missing.\n");
+            throw TestException("Solution "s + vectorToString(sol) + " missing.\n");
         }
     }
 }
@@ -120,8 +118,4 @@ void TestAlgoXV1() {
     };
     solutions = algorithmX(data, 7);
     assertSolutionListCorrect(solutions, expectedSolutions);
-}
-
-TestAlgoX::TestAlgoX()  {
-    AddToTestSuite(TestAlgoXV1);
 }

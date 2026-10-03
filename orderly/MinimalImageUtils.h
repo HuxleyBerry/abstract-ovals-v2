@@ -1,0 +1,141 @@
+#ifndef MINIMAL_IMAGE_UTILS_H
+#define MINIMAL_IMAGE_UTILS_H
+
+#include <vector>
+#include <array>
+#include <utility>
+#include <cstdint>
+#include <optional>
+#include <algorithm>
+#include <tuple>
+#include "../SymmetricGroupElement.h"
+
+std::vector<std::vector<size_t>> getAllPermutations(int permSize);
+
+struct InvolutionStructure {
+    std::vector<std::pair<int,int>> pairs;
+    std::pair<int, int> fixedPoints; //guaranteed to be at most two fixed points.
+};
+
+template <size_t N>
+InvolutionStructure getInvolutionStructure(const std::array<size_t, N>& arrayRep) {
+    std::vector<std::pair<int,int>> pairs;
+    std::uint16_t bitset = 0;
+    int firstFixed = -1;
+    int secondFixed = -1;
+    for (int i = 0; i < N; ++i) {
+        if (((bitset >> i) & 1) == 0) {
+            bitset |= (1 << i);
+            int image = arrayRep[i];
+            if (i == image) { // fixed point
+                if (firstFixed == -1) {
+                    firstFixed = i;
+                } else {
+                    secondFixed = i;
+                }
+            } else {
+                pairs.emplace_back(i, image);
+                bitset |= (1 << image);
+            }
+        }
+    }
+    return { pairs, std::pair(firstFixed, secondFixed) };
+}
+
+// assumes involution has either zero, one, or two fixed points
+// TODO: consider if a BSGS would be more efficient rather than computing list of every element
+template <size_t N>
+std::vector<SymmetricGroupElement<N>> getInvolutionStabilizer(const SymmetricGroupElement<N>& inv) {
+    std::vector<SymmetricGroupElement<N>> stabilizingPermutations;
+    const InvolutionStructure structure = getInvolutionStructure(inv.getInternalArray());
+    size_t pairCount = structure.pairs.size();
+    for (const std::vector<size_t>& innerPerm: getAllPermutations(pairCount)) {
+        for (int transpositionSelection = 0; transpositionSelection < (1 << (pairCount)); ++transpositionSelection) {
+            std::array<size_t, N> perm;
+            for (size_t j = 0; j < pairCount; ++j) {
+                if (((transpositionSelection >> j) & 1) == 0) { // jth bit 0
+                    perm[structure.pairs[j].first] = structure.pairs[innerPerm[j]].first;
+                    perm[structure.pairs[j].second] = structure.pairs[innerPerm[j]].second;
+                } else {
+                    perm[structure.pairs[j].first] = structure.pairs[innerPerm[j]].second;
+                    perm[structure.pairs[j].second] = structure.pairs[innerPerm[j]].first;
+                }
+            }
+            if (structure.fixedPoints.first != -1) {
+                if (structure.fixedPoints.second != -1) {
+                    std::array<size_t, N> perm2(perm);
+                    perm[structure.fixedPoints.first] = structure.fixedPoints.second;
+                    perm[structure.fixedPoints.second] = structure.fixedPoints.first;
+                    perm2[structure.fixedPoints.first] = structure.fixedPoints.first;
+                    perm2[structure.fixedPoints.second] = structure.fixedPoints.second;
+                    stabilizingPermutations.push_back(SymmetricGroupElement<N>(std::move(perm2)));
+                } else {
+                    perm[structure.fixedPoints.first] = structure.fixedPoints.first;
+                }
+            }
+            stabilizingPermutations.push_back(SymmetricGroupElement<N>(std::move(perm)));
+        }
+    }
+    return stabilizingPermutations;
+}
+
+template <size_t N>
+std::vector<SymmetricGroupElement<N>> getInvolutionStabilizerGivenGroup(const SymmetricGroupElement<N>& inv, const std::vector<SymmetricGroupElement<N>>& listOfAllGroupElements) {
+    std::vector<SymmetricGroupElement<N>> stab;
+    for (const SymmetricGroupElement<N>& el : listOfAllGroupElements) {
+        if (el * inv == inv * el) {
+            stab.push_back(el);
+        }
+    }
+    return stab;
+}
+
+// Assumes involution has either zero, one, or two fixed points.
+// finds the minimal member of the orbit of the given involution under the conjugation action of
+// S_N. The notion of "minimal" uses an ordering on the permutation of S_N which is just tuple
+// comparison of the array representation of the permutation.
+template <size_t N>
+SymmetricGroupElement<N> getMinimalImageOfInvolution(const SymmetricGroupElement<N>& inv, int fixedPointCount) {
+    std::array<size_t, N> perm;
+    int startOfNotFixed = 0;
+    for (int i = 0; i < fixedPointCount; ++i) {
+        perm[i] = i;
+        ++startOfNotFixed;
+    }
+    for (int i = startOfNotFixed; i < N; i += 2) {
+        perm[i] = i + 1;
+        perm[i + 1] = i;
+    }
+    return SymmetricGroupElement<N>(std::move(perm));
+}
+
+// Assumes involution has either zero, one, or two fixed points.
+// returns a pair (g,h) such that inv^h = g.
+template <size_t N>
+std::pair<SymmetricGroupElement<N>,SymmetricGroupElement<N>> getMinimalImageOfInvolutionWithGroupElement(const SymmetricGroupElement<N>& inv) {
+    std::array<size_t, N> arrayForMinimal;
+    std::array<size_t, N> arrayForPermutationAchievingMinimal;
+    InvolutionStructure structure = getInvolutionStructure(inv.getInternalArray());
+    int startOfNotFixed = 0;
+    if (structure.fixedPoints.first != -1) {
+        arrayForMinimal[0] = 0;
+        arrayForPermutationAchievingMinimal[structure.fixedPoints.first] = 0;
+        ++startOfNotFixed;
+    }
+    if (structure.fixedPoints.second != -1) {
+        arrayForMinimal[1] = 1;
+        arrayForPermutationAchievingMinimal[structure.fixedPoints.second] = 1;
+        ++startOfNotFixed;
+    }
+    int pairIndex = 0;
+    for (int i = startOfNotFixed; i < N; i += 2) {
+        arrayForMinimal[i] = i + 1;
+        arrayForMinimal[i + 1] = i;
+        arrayForPermutationAchievingMinimal[structure.pairs[pairIndex].first] = i;
+        arrayForPermutationAchievingMinimal[structure.pairs[pairIndex].second] = i + 1;
+        ++pairIndex;
+    }
+    return std::pair(SymmetricGroupElement<N>(std::move(arrayForMinimal)), SymmetricGroupElement<N>(std::move(arrayForPermutationAchievingMinimal)));
+}
+
+#endif

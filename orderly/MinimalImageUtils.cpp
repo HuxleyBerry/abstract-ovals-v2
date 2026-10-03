@@ -1,4 +1,4 @@
-#include "MinimalImage.h"
+#include "MinimalImageUtils.h"
 #include <vector>
 #include <cstdint>
 #include <utility>

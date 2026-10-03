@@ -1,5 +1,4 @@
 #include "TestSuite.h"
-#include "../orderly/MinimalImage.h"
 
 void TestMinimalImageOfSingleInvolution();
 void TestMinimalImageOfSingleInvolutionWithGroupElementFinder();

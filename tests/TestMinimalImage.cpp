@@ -1,6 +1,8 @@
 #include "TestMinimalImage.h"
 #include "SymmetricGroupTestUtils.h"
 #include "../SymmetricGroupUtils.h"
+#include "../orderly/MinimalImage.h"
+#include "../orderly/MinimalImageUtils.h"
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -184,8 +186,6 @@ void TestIsMinimalCheckOfinvolutionSetMatchesNaiveAlgorithmResult() {
     if (foundToBeMinimal.size() == 0) {
         throw TestException("At least one minimal element should have been found"); // at least one because we encounter multiple orderings of the same set.
     }
-    std::cout << listOfPermutationsToString(minimumAccordingToNaiveAlgorithm) << "\n";
-    std::cout << listOfPermutationsToString(foundToBeMinimal[0]) << "\n";
     for (std::vector<SymmetricGroupElement<6>>& oughtToBeMinimal: foundToBeMinimal) {
         if (oughtToBeMinimal != minimumAccordingToNaiveAlgorithm) {
             throw TestException("Expected to get a minimum of " + listOfPermutationsToString(minimumAccordingToNaiveAlgorithm) + ".\n Instead got " + listOfPermutationsToString(foundToBeMinimal[0]));
