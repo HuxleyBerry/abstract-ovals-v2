@@ -13,5 +13,5 @@ int main(int argc, char** argv) {
         std::cout << "Invalid order '" << argv[1] << "' provided\n";
         std::exit(1);
     }
-    printAllAbstractOvals(order);
+    printAllAbstractOvalsWithIsomorphsRemoved(order);
 }

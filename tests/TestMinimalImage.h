@@ -7,6 +7,7 @@ void TestPermutationFinder();
 void TestGetInvolutionStructure();
 void TestGetInvolutionStabiliser();
 void TestIsMinimalCheckOfinvolutionSetBasicExamples();
+void TestIsMinimalCheckOfinvolutionSetMediumExamples();
 void TestIsMinimalCheckOfinvolutionSetMatchesNaiveAlgorithmResult();
 
 class TestMinimalImage : public TestSuite {
@@ -18,6 +19,7 @@ public:
         AddToTestSuite(TestGetInvolutionStructure);
         AddToTestSuite(TestGetInvolutionStabiliser);
         AddToTestSuite(TestIsMinimalCheckOfinvolutionSetBasicExamples);
+        AddToTestSuite(TestIsMinimalCheckOfinvolutionSetMediumExamples);
         AddToTestSuite(TestIsMinimalCheckOfinvolutionSetMatchesNaiveAlgorithmResult);
     }
 };

@@ -22,7 +22,7 @@ all: program tests
 
 tests: run-tests
 
-program: $(PROGRAM_SOURCES)
+program: $(PROGRAM_SOURCES) program.cpp
 	$(CXX) $(CXXFLAGS) program.cpp $(filter %.cpp,$(PROGRAM_SOURCES)) -o $@
 
 run-tests: $(TEST_SOURCES)

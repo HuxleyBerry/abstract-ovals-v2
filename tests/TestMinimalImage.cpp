@@ -76,12 +76,12 @@ void TestMinimalImageOfSingleInvolutionWithGroupElementFinder() {
     SymmetricGroupElement inv2 = SymmetricGroupElement<6>("(0,5)(2,4)(1,3)");
     const auto [minimal, achievingGroupElement] = (getMinimalImageOfInvolutionWithGroupElement(inv2));
     assertPermutationsEqual(minimal, inv1);
-    assertPermutationsEqual(minimal, congjugate(inv2, achievingGroupElement));
+    assertPermutationsEqual(minimal, conjugate(inv2, achievingGroupElement));
 
     SymmetricGroupElement inv3 = SymmetricGroupElement<3>("(1,2)");
     const auto [minimal2, achievingGroupElement2] = (getMinimalImageOfInvolutionWithGroupElement(inv3));
     assertPermutationsEqual(minimal2, inv3);
-    assertPermutationsEqual(minimal2, congjugate(inv3, achievingGroupElement2));
+    assertPermutationsEqual(minimal2, conjugate(inv3, achievingGroupElement2));
 }
 
 void TestGetInvolutionStructure() {
@@ -139,16 +139,56 @@ void TestIsMinimalCheckOfinvolutionSetBasicExamples() {
     }
 }
 
+void TestIsMinimalCheckOfinvolutionSetMediumExamples() {
+    std::vector<SymmetricGroupElement<6>> invSet = { SymmetricGroupElement<6>("(0,1)(2,3)(4,5)"),
+                                                     SymmetricGroupElement<6>("(0,1)(2,4)(3,5)"),
+                                                     SymmetricGroupElement<6>("(0,2)(1,5)(3,4)"),
+                                                     SymmetricGroupElement<6>("(0,3)(1,4)(2,5)") };
+    if (!isSetOfInvolutionsMinimal(invSet)) {
+        throw TestException("involution set should be minimal");
+    }
+
+    std::vector<SymmetricGroupElement<3>> invSet2 = { SymmetricGroupElement<3>("(1,2)"),
+                                                     SymmetricGroupElement<3>("(0,1)"),
+                                                     SymmetricGroupElement<3>("(0,2)"),};
+    if (!isSetOfInvolutionsMinimal(invSet2)) {
+        throw TestException("involution set should be minimal");
+    }
+}
+
 void TestIsMinimalCheckOfinvolutionSetMatchesNaiveAlgorithmResult() {
     std::vector<SymmetricGroupElement<6>> invSet = { SymmetricGroupElement<6>("(0,3)(2,4)(1,5)"),
                                                      SymmetricGroupElement<6>("(0,5)(2,3)(1,4)"),
                                                      SymmetricGroupElement<6>("(0,1)(2,5)(3,4)"),
                                                      SymmetricGroupElement<6>("(0,2)(1,4)(3,5)") };
 
-    std::vector<std::vector<size_t>> allPermutations = getAllPermutations(6);
+    const std::vector<std::vector<size_t>> allPermutations = getAllPermutations(6);
+    std::vector<std::vector<SymmetricGroupElement<6>>> foundToBeMinimal;
+    bool flag = true;
+    std::vector<SymmetricGroupElement<6>> minimumAccordingToNaiveAlgorithm;
     for (const std::vector<size_t>& perm: allPermutations) {
         std::array<size_t, 6> permArray;
         std::copy(perm.cbegin(), perm.cend(), permArray.begin());
         SymmetricGroupElement<6> groupElement(std::move(permArray));
+        std::vector<SymmetricGroupElement<6>> conjugatedSet = conjugatePermutationSet(invSet, groupElement);
+        std::sort(conjugatedSet.begin(), conjugatedSet.end());
+
+        if (isSetOfInvolutionsMinimal(conjugatedSet)) {
+            foundToBeMinimal.push_back(conjugatedSet);
+        }
+        if (flag || isPermutationSetLexicographicallyLess(conjugatedSet, minimumAccordingToNaiveAlgorithm)) {
+            minimumAccordingToNaiveAlgorithm = conjugatedSet;
+            flag = false;
+        }
+    }
+    if (foundToBeMinimal.size() == 0) {
+        throw TestException("At least one minimal element should have been found"); // at least one because we encounter multiple orderings of the same set.
+    }
+    std::cout << listOfPermutationsToString(minimumAccordingToNaiveAlgorithm) << "\n";
+    std::cout << listOfPermutationsToString(foundToBeMinimal[0]) << "\n";
+    for (std::vector<SymmetricGroupElement<6>>& oughtToBeMinimal: foundToBeMinimal) {
+        if (oughtToBeMinimal != minimumAccordingToNaiveAlgorithm) {
+            throw TestException("Expected to get a minimum of " + listOfPermutationsToString(minimumAccordingToNaiveAlgorithm) + ".\n Instead got " + listOfPermutationsToString(foundToBeMinimal[0]));
+        }
     }
 }

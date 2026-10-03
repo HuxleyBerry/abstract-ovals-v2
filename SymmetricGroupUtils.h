@@ -129,4 +129,26 @@ std::string listOfPermutationsToString(const std::vector<SymmetricGroupElement<N
     return ans;
 }
 
+template <size_t N>
+std::vector<SymmetricGroupElement<N>> conjugatePermutationSet(const std::vector<SymmetricGroupElement<N>>& set, const SymmetricGroupElement<N>& conjugateBy) {
+    std::vector<SymmetricGroupElement<N>> result;
+    result.reserve(set.size());
+    for (const auto& el: set) {
+        result.push_back(conjugate(el, conjugateBy));
+    }
+    return result;
+}
+
+template <size_t N>
+bool isPermutationSetLexicographicallyLess(const std::vector<SymmetricGroupElement<N>>& left, const std::vector<SymmetricGroupElement<N>>& right) {
+    for (size_t i = 0; i < std::min(left.size(), right.size()); ++i) {
+        if (left[i] < right[i]) {
+            return true;
+        } else if (left[i] > right[i]) {
+            return false;
+        }
+    }
+    return left.size() < right.size();
+}
+
 #endif

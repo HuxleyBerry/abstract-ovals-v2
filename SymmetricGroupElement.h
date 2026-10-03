@@ -189,7 +189,7 @@ private:
     std::array<size_t, N> m_image;
 };
 
-// acting from the left
+// The right permutation is applied first.
 template <size_t N>
 SymmetricGroupElement<N> operator*(const SymmetricGroupElement<N>& left, const SymmetricGroupElement<N>& right) {
     std::array<size_t, N> ans;
@@ -199,9 +199,11 @@ SymmetricGroupElement<N> operator*(const SymmetricGroupElement<N>& left, const S
     return SymmetricGroupElement<N>(std::move(ans));
 }
 
-// acting from left
+// given the right-to-left convention we use for multiplication, this is the natural convention to use for
+// conjugation because it is equivalent to relabelling the cycle representation according to the permutation.
+// The consequence is that x^(ab) = (x^b)^a
 template <size_t N>
-SymmetricGroupElement<N> congjugate(const SymmetricGroupElement<N>& toConjugate, const SymmetricGroupElement<N>& toConjugateWith) {
+SymmetricGroupElement<N> conjugate(const SymmetricGroupElement<N>& toConjugate, const SymmetricGroupElement<N>& toConjugateWith) {
     return toConjugateWith * toConjugate * toConjugateWith.inverse();
 }
 

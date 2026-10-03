@@ -1,37 +1,37 @@
 #include "AbstractOvalFinder.h"
 #include <iostream>
 
-void printAllAbstractOvals(int order) {
+void printAllAbstractOvalsWithIsomorphsRemoved(int order) {
     if (order < 2 || order > 10) {
         std::cerr << "Order " << order << " is not supported\n";
     } else {
         switch (order) {
         case 2:
-            printAllAbstractOvals<2>();
+            printAllAbstractOvalsWithIsomorphsRemoved<2>();
             break;
         case 3:
-            printAllAbstractOvals<3>();
+            printAllAbstractOvalsWithIsomorphsRemoved<3>();
             break;
         case 4:
-            printAllAbstractOvals<4>();
+            printAllAbstractOvalsWithIsomorphsRemoved<4>();
             break;
         case 5:
-            printAllAbstractOvals<5>();
+            printAllAbstractOvalsWithIsomorphsRemoved<5>();
             break;
         case 6:
-            printAllAbstractOvals<6>();
+            printAllAbstractOvalsWithIsomorphsRemoved<6>();
             break;
         case 7:
-            printAllAbstractOvals<7>();
+            printAllAbstractOvalsWithIsomorphsRemoved<7>();
             break;
         case 8:
-            printAllAbstractOvals<8>();
+            printAllAbstractOvalsWithIsomorphsRemoved<8>();
             break;
         case 9:
-            printAllAbstractOvals<9>();
+            printAllAbstractOvalsWithIsomorphsRemoved<9>();
             break;
         case 10:
-            printAllAbstractOvals<10>();
+            printAllAbstractOvalsWithIsomorphsRemoved<10>();
             break;
         }
     }

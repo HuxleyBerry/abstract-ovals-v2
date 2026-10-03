@@ -22,10 +22,14 @@ void TestMultiplication() {
     SymmetricGroupElement<3> s1("()");
     SymmetricGroupElement<3> s2("()");
     assertPermutationEquality(s1 * s2, s2);
+
+    SymmetricGroupElement<6> s3("(1,2)(3,4,5)");
+    SymmetricGroupElement<6> s4("(0,4,2)(1,5,3)");
+    assertPermutationEquality(s3 * s4, SymmetricGroupElement<6>("(0,5,4,1,3,2)"));
 }
 
 void TestConjugation() {
     SymmetricGroupElement<3> s1("(1,2)");
     SymmetricGroupElement<3> s2("(0,1,2)");
-    assertPermutationEquality(congjugate(s1, s2), SymmetricGroupElement<3>("(0,2)"));
+    assertPermutationEquality(conjugate(s1, s2), SymmetricGroupElement<3>("(0,2)"));
 }
