@@ -8,49 +8,49 @@
 #include <algorithm>
 #include <utility>
 
-namespace {
-    int pairToInt(const std::pair<int,int>& p, int base) {
-        if (p.first < p.second) {
-            return base*p.first + p.second;
-        } else {
-            return base*p.second + p.first;
-        }
-    }
 
-    bool arePairListsEqual(const std::vector<std::pair<int,int>>& m1, const std::vector<std::pair<int,int>>& m2) {
-        if (m1.size() != m2.size()) {
-            return false;
-        }
-        constexpr int base = 16;
-        std::array<bool, base * base> found;
-        found.fill(false);
-        for (const auto& pair: m1) {
-            found[pairToInt(pair, base)] = true;
-        }
-        for (const auto& pair: m2) {
-            if (!found[pairToInt(pair, base)]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    std::string pairListToString(const std::vector<std::pair<int,int>>& matching) {
-        std::ostringstream ss;
-        ss << "[";
-        for (const auto& [first, second]: matching) {
-            ss << "(" << first << ", " << second << "), ";
-        }
-        ss << "]";
-        return ss.str();
-    }
-
-    void assertPairListsEqual(const std::vector<std::pair<int,int>>& m1, const std::vector<std::pair<int,int>>& m2) {
-        if (!arePairListsEqual(m1, m2)) {
-            throw TestException("Matchings not equal. " + pairListToString(m1) + " != " + pairListToString(m2));
-        }
+int pairToInt(const std::pair<int,int>& p, int base) {
+    if (p.first < p.second) {
+        return base*p.first + p.second;
+    } else {
+        return base*p.second + p.first;
     }
 }
+
+bool arePairListsEqual(const std::vector<std::pair<int,int>>& m1, const std::vector<std::pair<int,int>>& m2) {
+    if (m1.size() != m2.size()) {
+        return false;
+    }
+    constexpr int base = 16;
+    std::array<bool, base * base> found;
+    found.fill(false);
+    for (const auto& pair: m1) {
+        found[pairToInt(pair, base)] = true;
+    }
+    for (const auto& pair: m2) {
+        if (!found[pairToInt(pair, base)]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::string pairListToString(const std::vector<std::pair<int,int>>& matching) {
+    std::ostringstream ss;
+    ss << "[";
+    for (const auto& [first, second]: matching) {
+        ss << "(" << first << ", " << second << "), ";
+    }
+    ss << "]";
+    return ss.str();
+}
+
+void assertPairListsEqual(const std::vector<std::pair<int,int>>& m1, const std::vector<std::pair<int,int>>& m2) {
+    if (!arePairListsEqual(m1, m2)) {
+        throw TestException("Matchings not equal. " + pairListToString(m1) + " != " + pairListToString(m2));
+    }
+}
+
 
 void TestPermutationFinder() {
     std::vector<std::vector<size_t>> allPerms = getAllPermutations(5);

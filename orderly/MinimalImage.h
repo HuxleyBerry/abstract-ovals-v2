@@ -10,12 +10,10 @@
 #include "../SymmetricGroupElement.h"
 #include "MinimalImageUtils.h"
 
-namespace {
-    enum class MinimalStatus {
-        NotMinimal,
-        Undetermined
-    };
-}
+enum class MinimalStatus {
+    NotMinimal,
+    Undetermined
+};
 
 // If indexIntoPermutation is i, it means we are evaluating a candidate for the ith coordinate at this poit in the recursive process
 // If indexIntoPermutation is i, and the involution set is A = {a_0,...,a_(N-1)}, then minimumAchievingGroupElement is *a* an element g of 

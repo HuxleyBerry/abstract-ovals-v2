@@ -170,8 +170,18 @@ public:
         return cycleSizes;
     }
 
-    int actOn(int p) const {
+    size_t actOn(size_t p) const {
         return m_image[p];
+    }
+
+    int getFixedPointCount() const {
+        int count = 0;
+        for (size_t i = 0; i < m_image.size(); ++i) {
+            if (m_image[i] == i) {
+                ++count;
+            }
+        }
+        return count;
     }
 
     const std::array<size_t, N>& getInternalArray() const {

@@ -109,6 +109,12 @@ SymmetricGroupElement<N> getMinimalImageOfInvolution(const SymmetricGroupElement
     return SymmetricGroupElement<N>(std::move(perm));
 }
 
+template <size_t N>
+SymmetricGroupElement<N> getMinimalImageOfInvolution(const SymmetricGroupElement<N>& inv) {
+    int fixedPointCount = inv.getCycleStructure();
+    return getMinimalImageOfInvolution(inv, fixedPointCount);
+}
+
 // Assumes involution has either zero, one, or two fixed points.
 // returns a pair (g,h) such that inv^h = g.
 template <size_t N>
