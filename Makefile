@@ -3,7 +3,8 @@ CXXFLAGS := -O3 -std=c++17 -MMD -MP
 
 SHARED_SOURCES := \
 	AbstractOvalUtils.cpp \
-	exact-cover-solvers/dancing-links.cpp \
+	exact-cover-solvers/AlgorithmDLX_V1.cpp \
+	exact-cover-solvers/AlgorithmDLX_V2.cpp \
 	AbstractOvalFinder.cpp \
 	orderly/MinimalImageUtils.cpp
 

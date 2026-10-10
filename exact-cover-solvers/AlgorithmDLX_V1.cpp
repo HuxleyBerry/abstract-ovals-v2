@@ -1,4 +1,4 @@
-#include "dancing-links.h"
+#include "AlgorithmDLX_V1.h"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -206,7 +206,7 @@ namespace {
 
 }
 
-std::vector<std::vector<int>> algorithmX(const std::vector<std::vector<int>>& data, int itemCount) {
+std::vector<std::vector<int>> algorithmX_V1(const std::vector<std::vector<int>>& data, int itemCount) {
     std::vector<std::vector<int>> solutions;
 
     Node* latticeRoot = makeLattice(data, itemCount);

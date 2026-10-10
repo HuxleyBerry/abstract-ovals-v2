@@ -4,7 +4,7 @@
 #include <vector>
 #include "SymmetricGroupElement.h"
 #include "AbstractOvalUtils.h"
-#include "exact-cover-solvers/dancing-links.h"
+#include "exact-cover-solvers/AlgorithmDLX_V2.h"
 #include "orderly/MinimalImage.h"
 
 template <size_t N>
@@ -12,7 +12,7 @@ std::vector<std::vector<SymmetricGroupElement<N + 1>>> basicAbstractOvalFinderEx
     std::vector<SymmetricGroupElement<N + 1>> candidatePermutations(getAbstractOvalCandidatePermutations<N>());
     std::vector<FourPoints> quadruplesToBeCovered(getPointCombinationsForAbstractOval(N));
     auto covering = getCovering<N>(candidatePermutations, quadruplesToBeCovered);
-    std::vector<std::vector<int>> solutionsAsIndices = algorithmX(covering, quadruplesToBeCovered.size());
+    std::vector<std::vector<int>> solutionsAsIndices = algorithmX_V2(covering, quadruplesToBeCovered.size());
     std::vector<std::vector<SymmetricGroupElement<N + 1>>> solutionsAsPermutations;
     std::transform(solutionsAsIndices.cbegin(), solutionsAsIndices.cend(), std::back_inserter(solutionsAsPermutations), [&candidatePermutations](const std::vector<int> sol){
         std::vector<SymmetricGroupElement<N + 1>> asPerm;
