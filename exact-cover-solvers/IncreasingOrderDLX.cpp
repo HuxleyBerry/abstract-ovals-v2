@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <map>
 #include <utility>
+#include <optional>
 #include "IncreasingOrderDLX.h"
 
 namespace {
@@ -93,7 +94,6 @@ namespace {
     }
 
     void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide) {
-        //std::cout << "hiding " << indexForNormalNode << "\n";
         size_t currentIndex = indexForNormalNode + 1;
         while (currentIndex != indexForNormalNode) {
             if (nodes[currentIndex].type == 1) { // option node
@@ -104,12 +104,10 @@ namespace {
                     nodes[nodes[currentIndex].U].D = nodes[currentIndex].D;
                     nodes[nodes[currentIndex].D].U = nodes[currentIndex].U;
                 }
-                //std::cout << "hide(): removing " << currentIndex << " from vertical list" << "\n";
                 ++currentIndex;
             } else {
                 nodes[nodes[currentIndex].U].D = nodes[currentIndex].D;
                 nodes[nodes[currentIndex].D].U = nodes[currentIndex].U;
-                //std::cout << "hide(): removing " << currentIndex << " from vertical list" << "\n";
                 ++currentIndex; // proceed to the next node belonging to the current option.
             }
         }
@@ -136,7 +134,6 @@ namespace {
     void cover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide) {
         size_t currentIndex = nodes[indexForItemNode].D;
         while (currentIndex != indexForItemNode) {
-            //std::cout << "cover(): " << currentIndex << "\n";
             hideOption(nodes, currentIndex, optionNodeToNotHide);
             currentIndex = nodes[currentIndex].D;
         }
@@ -186,6 +183,24 @@ namespace {
         }
     }
 
+    std::optional<size_t> getFinalPlausibleIndex(std::vector<Node>& nodes) {
+        size_t currentNode = nodes[0].R;
+        bool flag = true;
+        size_t smallestFinalNodeInVerticalList;
+        while (currentNode != 0) {
+            size_t finalNode = nodes[currentNode].U;
+            if (finalNode == currentNode) { // nothing left covering this item
+                return std::nullopt;
+            }
+            if (flag || finalNode < smallestFinalNodeInVerticalList) {
+                flag = false;
+                smallestFinalNodeInVerticalList = finalNode;
+            }
+            currentNode = nodes[currentNode].R;
+        }
+        return std::make_optional(smallestFinalNodeInVerticalList);
+    }
+
     void algorithmX_V2_Helper(std::vector<Node>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions) {
         //printAllNodes(nodes);
         if (nodes[0].R == 0) { // all items covered
@@ -193,13 +208,17 @@ namespace {
             solutions.emplace_back(partialSolution.cbegin(), partialSolution.cbegin() + level);
             return;
         }
+
+        std::optional<size_t> indexOfNodeInFinalPlausibleOption = getFinalPlausibleIndex(nodes);
+        if (!indexOfNodeInFinalPlausibleOption) {
+            return;
+        }
         
         while (currentOptionNodeIndex != 0) {
-            //std::cout << "Selecting option " << optionNodeIndexToOptionIndex.at(currentOptionNodeIndex) << " at level " << level << "\n";
-            if (optionNodeIndexToOptionIndex.at(currentOptionNodeIndex) == 1 && level == 0) {
-                //std::cout << "SPECIAL\n";
-                //printAllNodes(nodes);
+            if (currentOptionNodeIndex > indexOfNodeInFinalPlausibleOption) {
+                break;
             }
+            //std::cout << "Selecting option " << optionNodeIndexToOptionIndex.at(currentOptionNodeIndex) << " at level " << level << "\n";
             size_t currIndexWithinOption = currentOptionNodeIndex + 1;
             while (nodes[currIndexWithinOption].type == 2) {
                 //std::cout << "calling cover on index node " << nodes[currIndexWithinOption].L << "\n";
