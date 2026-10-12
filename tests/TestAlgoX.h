@@ -8,11 +8,15 @@ void assertSolutionListCorrect(const std::vector<std::vector<int>>& toTest, cons
 
 void TestAlgoXV1();
 void TestAlgoXV2();
+void TestIncreasingOrderDLX();
+void TestIncreasingOrderDLXSolutionsAreInOrder();
 
 class TestAlgoX : public TestSuite {
 public:
     TestAlgoX()  {
         AddToTestSuite(TestAlgoXV1);
         AddToTestSuite(TestAlgoXV2);
+        AddToTestSuite(TestIncreasingOrderDLX);
+        AddToTestSuite(TestIncreasingOrderDLXSolutionsAreInOrder);
     }
 };

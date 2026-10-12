@@ -5,6 +5,7 @@ SHARED_SOURCES := \
 	AbstractOvalUtils.cpp \
 	exact-cover-solvers/AlgorithmDLX_V1.cpp \
 	exact-cover-solvers/AlgorithmDLX_V2.cpp \
+	exact-cover-solvers/IncreasingOrderDLX.cpp \
 	AbstractOvalFinder.cpp \
 	orderly/MinimalImageUtils.cpp
 

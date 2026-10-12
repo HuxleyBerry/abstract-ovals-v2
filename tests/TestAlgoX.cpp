@@ -6,6 +6,7 @@
 #include "TestAlgoX.h"
 #include "../exact-cover-solvers/AlgorithmDLX_V1.h"
 #include "../exact-cover-solvers/AlgorithmDLX_V2.h"
+#include "../exact-cover-solvers/IncreasingOrderDLX.h"
 
 using namespace std::string_literals;
 
@@ -133,4 +134,35 @@ void TestAlgoXV2() {
     testExactCoverSolver([](const std::vector<std::vector<int>>& data, int itemCount){
         return algorithmX_V2(data, itemCount);
     });
+}
+
+void TestIncreasingOrderDLX() {
+    testExactCoverSolver([](const std::vector<std::vector<int>>& data, int itemCount){
+        return increasingOrderSolver(data, itemCount);
+    });
+}
+
+void TestIncreasingOrderDLXSolutionsAreInOrder() {
+    std::vector<std::vector<int>> data = {
+        {0, 1},
+        {2, 3},
+        {0, 2},
+        {1, 3},
+        {0, 3},
+        {1, 2},
+        {4, 5},
+        {6, 7},
+        {4, 6},
+        {5, 7},
+        {4, 7},
+        {5, 6}
+    };
+    std::vector<std::vector<int>> solutions = increasingOrderSolver(data, 8);
+    for (const std::vector<int>& sol : solutions) {
+        for (int i = 0; i < sol.size() - 1; ++i) {
+            if (sol[i] >= sol[i+1]) {
+                throw TestException("Expected solution to be in ascending order: " + vectorToString(sol));
+            }
+        }
+    }
 }

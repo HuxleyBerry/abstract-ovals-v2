@@ -2,22 +2,22 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <cstdint>
 #include "AlgorithmDLX_V2.h"
 
 namespace {
     struct Node {
-        size_t L; // in non header nodes, this stores the index of the associated option
-        size_t R;
-        size_t U;
-        size_t D;
-        size_t top; // in header nodes, this instead counts the number of options covering the item
-        bool isHeader;
+        std::uint32_t L = 0; // in non header nodes, this stores the index of the associated option
+        std::uint32_t R = 0;
+        std::uint32_t U = 0;
+        std::uint32_t D = 0;
+        std::uint32_t top; // in header nodes, this instead counts the number of options covering the item
 
-        Node(bool h, size_t t): isHeader(h), top(t) {}
+        Node(std::uint32_t t): top(t) {}
     };
 
     void addToEndOfHorizontalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex) {
-        size_t endIndex = nodeStorage[startIndex].L;
+        std::uint32_t endIndex = nodeStorage[startIndex].L;
         nodeStorage[endIndex].R = toAddIndex;
         nodeStorage[startIndex].L = toAddIndex;
         nodeStorage[toAddIndex].L = endIndex;
@@ -25,7 +25,7 @@ namespace {
     }
 
     void addToEndOfVerticalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex) {
-        size_t endIndex = nodeStorage[startIndex].U;
+        std::uint32_t endIndex = nodeStorage[startIndex].U;
         nodeStorage[endIndex].D = toAddIndex;
         nodeStorage[startIndex].U = toAddIndex;
         nodeStorage[toAddIndex].U = endIndex;
@@ -40,11 +40,11 @@ namespace {
         std::vector<Node> nodes;
         nodes.reserve(requiredNodeCount);
 
-        nodes.emplace_back(true, 0);
+        nodes.emplace_back(0);
         nodes[0].L = 0;
         nodes[0].R = 0;
         for (size_t i = 1; i <= itemCount; ++i) { // starting at i = 1 to account for the root
-            nodes.emplace_back(true, 0);
+            nodes.emplace_back(0);
             nodes[i].U = i;
             nodes[i].D = i;
 
@@ -54,14 +54,14 @@ namespace {
         for (size_t i = 0; i < data.size(); ++i) {
             const std::vector<int>& option = data[i];
             // add spacer. Spacers use the convention that Node.top = 0
-            nodes.emplace_back(false, 0);
+            nodes.emplace_back(0);
             if (i != 0) {
                 nodes[currentIndex].U = currentIndex - data[i - 1].size();
             }
             nodes[currentIndex].D = currentIndex + option.size();
             ++currentIndex;
             for (int itemIdx: option) {
-                nodes.emplace_back(false, itemIdx + 1); // +1 because index 0 of nodes is reserved for the root.
+                nodes.emplace_back(itemIdx + 1); // +1 because index 0 of nodes is reserved for the root.
                 addToEndOfVerticalDoublyLinkedList(nodes, itemIdx + 1, currentIndex);
                 nodes[currentIndex].L = i;
                 ++nodes[itemIdx + 1].top; // increment the count of options covering the specific item.
@@ -69,7 +69,7 @@ namespace {
             }
             if (i == data.size() - 1) {
                 // add final spacer
-                nodes.emplace_back(false, 0);
+                nodes.emplace_back(0);
                 nodes[currentIndex].U = currentIndex - option.size();
             }
         }
@@ -128,7 +128,7 @@ namespace {
 
     std::string nodeToString(const Node& node) {
         std::ostringstream ss;
-        if (node.isHeader) {
+        if (node.L != 0 || node.R != 0) {
             ss << "header node: { ";
             ss << "U: " << node.U;
             ss << ", D: " << node.D;
@@ -160,7 +160,7 @@ namespace {
         }
     }
 
-    void algorithmX_V2_Helper(std::vector<Node>& nodes, int itemCount, int level, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions) {
+    void algorithmX_V2_Helper(std::vector<Node>& nodes, int level, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions) {
         if (nodes[0].R == 0) { // all items covered
             // note a copy of partialSolution is made.
             solutions.emplace_back(partialSolution.cbegin(), partialSolution.cbegin() + level);
@@ -183,7 +183,7 @@ namespace {
         size_t currentOptionNodeIndex = nodes[indexOfChosenItem].D;
         while (currentOptionNodeIndex != indexOfChosenItem) {
             //std::cout << "covering item " << indexOfChosenItem << " with option " << nodes[currentOptionNodeIndex].L << "\n";
-            // now cover all the items covered by the currentOption
+            // now cover all the items covered by the current option
             size_t curr = currentOptionNodeIndex + 1;
             while (curr != currentOptionNodeIndex) {
                 size_t top = nodes[curr].top;
@@ -195,7 +195,7 @@ namespace {
                 }
             }
             partialSolution[level] = nodes[currentOptionNodeIndex].L; // recall that on a non header node, the L property is used to point to the associated option.
-            algorithmX_V2_Helper(nodes, itemCount, level + 1, partialSolution, solutions);
+            algorithmX_V2_Helper(nodes, level + 1, partialSolution, solutions);
             //std::cout << "uncovering\n";
             // undo the covering
             curr = currentOptionNodeIndex - 1;
@@ -219,6 +219,6 @@ std::vector<std::vector<int>> algorithmX_V2(const std::vector<std::vector<int>>&
     std::vector<std::vector<int>> solutions;
     std::vector<Node> nodes = makeLinkStructure(data, itemCount);
     std::vector<int> partialSolution(itemCount); // assumes every option covers at least one item.
-    algorithmX_V2_Helper(nodes, itemCount, 0, partialSolution, solutions);
+    algorithmX_V2_Helper(nodes, 0, partialSolution, solutions);
     return solutions;
 }
