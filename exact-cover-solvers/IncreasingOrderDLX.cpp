@@ -93,17 +93,15 @@ namespace {
         return std::pair(nodes, optionNodeIndexToOptionIndex);
     }
 
-    void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide) {
+    void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode) {
         size_t currentIndex = indexForNormalNode + 1;
         while (currentIndex != indexForNormalNode) {
             if (nodes[currentIndex].type == 1) { // option node
                 // Loop back around to the previous option node. i.e. the option node associated with the input normal node.
                 currentIndex = nodes[currentIndex].L;
-                if (currentIndex != optionNodeToNotHide) {
-                    // remove option node from vertical list of option nodes
-                    nodes[nodes[currentIndex].U].D = nodes[currentIndex].D;
-                    nodes[nodes[currentIndex].D].U = nodes[currentIndex].U;
-                }
+                // remove option node from vertical list of option nodes
+                nodes[nodes[currentIndex].U].D = nodes[currentIndex].D;
+                nodes[nodes[currentIndex].D].U = nodes[currentIndex].U;
                 ++currentIndex;
             } else {
                 nodes[nodes[currentIndex].U].D = nodes[currentIndex].D;
@@ -113,15 +111,13 @@ namespace {
         }
     }
 
-    void unhideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide) {
+    void unhideOption(std::vector<Node>& nodes, size_t indexForNormalNode) {
         size_t currentIndex = indexForNormalNode - 1;
         while (currentIndex != indexForNormalNode) {
             if (nodes[currentIndex].type == 1) { // option node
-                if (currentIndex != optionNodeToNotHide) {
-                    // restore option node into vertical list
-                    nodes[nodes[currentIndex].U].D = currentIndex;
-                    nodes[nodes[currentIndex].D].U = currentIndex;
-                }
+                // restore option node into vertical list
+                nodes[nodes[currentIndex].U].D = currentIndex;
+                nodes[nodes[currentIndex].D].U = currentIndex;
                 currentIndex = nodes[currentIndex].R - 1; // loop back around to the last node belonging to the current option.
             } else {
                 nodes[nodes[currentIndex].U].D = currentIndex;
@@ -131,22 +127,24 @@ namespace {
         }
     }
 
-    void cover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide) {
-        size_t currentIndex = nodes[indexForItemNode].D;
-        while (currentIndex != indexForItemNode) {
-            hideOption(nodes, currentIndex, optionNodeToNotHide);
+    void coverDownwardOnly(std::vector<Node>& nodes, size_t indexForNormalNode) {
+        size_t headerIndex = nodes[indexForNormalNode].L;
+        size_t currentIndex = nodes[indexForNormalNode].D;
+        while (currentIndex != headerIndex) {
+            hideOption(nodes, currentIndex);
             currentIndex = nodes[currentIndex].D;
         }
-        nodes[nodes[indexForItemNode].L].R = nodes[indexForItemNode].R;
-        nodes[nodes[indexForItemNode].R].L = nodes[indexForItemNode].L;
+        nodes[nodes[headerIndex].L].R = nodes[headerIndex].R;
+        nodes[nodes[headerIndex].R].L = nodes[headerIndex].L;
     }
 
-    void uncover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide) {
-        nodes[nodes[indexForItemNode].L].R = indexForItemNode;
-        nodes[nodes[indexForItemNode].R].L = indexForItemNode;
-        size_t currentIndex = nodes[indexForItemNode].U;
-        while (currentIndex != indexForItemNode) {
-            unhideOption(nodes, currentIndex, optionNodeToNotHide);
+    void uncoverDownwardOnly(std::vector<Node>& nodes, size_t indexForNormalNode) {
+        size_t headerIndex = nodes[indexForNormalNode].L;
+        nodes[nodes[headerIndex].L].R = headerIndex;
+        nodes[nodes[headerIndex].R].L = headerIndex;
+        size_t currentIndex = nodes[headerIndex].U;
+        while (currentIndex != indexForNormalNode) {
+            unhideOption(nodes, currentIndex);
             currentIndex = nodes[currentIndex].U;
         }
     }
@@ -221,24 +219,23 @@ namespace {
             //std::cout << "Selecting option " << optionNodeIndexToOptionIndex.at(currentOptionNodeIndex) << " at level " << level << "\n";
             size_t currIndexWithinOption = currentOptionNodeIndex + 1;
             while (nodes[currIndexWithinOption].type == 2) {
-                //std::cout << "calling cover on index node " << nodes[currIndexWithinOption].L << "\n";
-                cover(nodes, nodes[currIndexWithinOption].L, currentOptionNodeIndex);
+                coverDownwardOnly(nodes, currIndexWithinOption);
                 ++currIndexWithinOption;
             }
+            //std::cout << "hiding\n";
+            hideOption(nodes, currentOptionNodeIndex + 1);
+            //std::cout << "hiding fone\n";
 
-            size_t next = nodes[currentOptionNodeIndex].D;
-            nodes[nodes[currentOptionNodeIndex].U].D = nodes[currentOptionNodeIndex].D;
-            nodes[nodes[currentOptionNodeIndex].D].U = nodes[currentOptionNodeIndex].U;
+            size_t next = nodes[nodes[currentOptionNodeIndex].U].D;
 
             partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
             algorithmX_V2_Helper(nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions);
 
-            nodes[nodes[currentOptionNodeIndex].U].D = currentOptionNodeIndex;
-            nodes[nodes[currentOptionNodeIndex].D].U = currentOptionNodeIndex;
+            unhideOption(nodes, currentOptionNodeIndex + 1);
 
             --currIndexWithinOption;
             while (nodes[currIndexWithinOption].type == 2) {
-                uncover(nodes, nodes[currIndexWithinOption].L, currentOptionNodeIndex);
+                uncoverDownwardOnly(nodes, currIndexWithinOption);
                 --currIndexWithinOption;
             }
 
