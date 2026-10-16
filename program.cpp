@@ -1,4 +1,5 @@
 #include "AbstractOvalFinder.h"
+#include "orderly-abstract-oval-finders/OrderlyAbstractOvalFinder_V1.h"
 #include <cstdlib>
 
 int main(int argc, char** argv) {
@@ -13,5 +14,6 @@ int main(int argc, char** argv) {
         std::cout << "Invalid order '" << argv[1] << "' provided\n";
         std::exit(1);
     }
-    printAllAbstractOvalsWithIsomorphsRemoved(order);
+    //printAllAbstractOvalsWithIsomorphsRemoved(order);
+    OAOF::printAllAbstractOvalsFoundFromOrderlyAlgorithm(order);
 }
