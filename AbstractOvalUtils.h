@@ -7,6 +7,7 @@
 #include <array>
 #include <utility>
 #include <string>
+#include <functional>
 
 struct FourPoints {
     unsigned int first;
@@ -114,6 +115,31 @@ bool validateAbstractOval(const std::vector<SymmetricGroupElement<order + 1>>& p
         }
     }
     return true;
+}
+
+template <size_t N>
+std::vector<std::vector<SymmetricGroupElement<N + 1>>> involutionIndicesToAbstractOvals(const std::vector<std::vector<int>>& involutionIndices, const std::vector<SymmetricGroupElement<N + 1>>& allInvolutions, bool includeIdentity) {
+    std::vector<std::vector<SymmetricGroupElement<N + 1>>> abstractOvals;
+    std::transform(involutionIndices.cbegin(), involutionIndices.cend(), std::back_inserter(abstractOvals), [&allInvolutions](const std::vector<int> sol){
+        std::vector<SymmetricGroupElement<N + 1>> asPerm;
+        std::transform(sol.cbegin(), sol.cend(), std::back_inserter(asPerm), [&allInvolutions](size_t i){
+            return allInvolutions[i];
+        });
+        if (N%2 == 0) {
+            asPerm.emplace_back("()");
+        }
+        return asPerm;
+    });
+    return abstractOvals;
+}
+
+template <size_t N>
+void printAllAbstractOvals(const std::function<std::vector<std::vector<SymmetricGroupElement<N + 1>>>()>& finderFunc) {
+    std::cout << "==================== Abstract Ovals of order " << std::to_string(N) << " ====================\n";
+    std::vector<std::vector<SymmetricGroupElement<N + 1>>> abstractOvals = finderFunc();
+    for (const std::vector<SymmetricGroupElement<N + 1>>& oval : abstractOvals) {
+        std::cout << listOfPermutationsToString<N + 1>(oval) << "\n";
+    }
 }
 
 #endif

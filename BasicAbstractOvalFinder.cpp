@@ -1,4 +1,4 @@
-#include "AbstractOvalFinder.h"
+#include "BasicAbstractOvalFinder.h"
 #include <iostream>
 
 void printAllAbstractOvalsWithIsomorphsRemoved(int order) {

@@ -121,27 +121,12 @@ namespace OAOF {
         std::vector<FourPoints> quadruplesToBeCovered(getPointCombinationsForAbstractOval(order));
         auto coveringData = getCovering<order>(candidateInvolutions, quadruplesToBeCovered);
         std::vector<std::vector<int>> solutionsAsIndices = orderlyExactCoverSolver<order>(candidateInvolutions, coveringData, quadruplesToBeCovered.size());
-        std::vector<std::vector<SymmetricGroupElement<order + 1>>> solutionsAsPermutations;
-        std::transform(solutionsAsIndices.cbegin(), solutionsAsIndices.cend(), std::back_inserter(solutionsAsPermutations), [&candidateInvolutions](const std::vector<int> sol){
-            std::vector<SymmetricGroupElement<order + 1>> asPerm;
-            std::transform(sol.cbegin(), sol.cend(), std::back_inserter(asPerm), [&candidateInvolutions](int i){
-                return candidateInvolutions[i];
-            });
-            if (order%2 == 0) {
-                asPerm.emplace_back("()");
-            }
-            return asPerm;
-        });
-        return solutionsAsPermutations;
+        return involutionIndicesToAbstractOvals<order>(solutionsAsIndices, candidateInvolutions, true);
     }
 
     template <size_t N>
     void printAllAbstractOvals() {
-        std::cout << "==================== Abstract Ovals of order " << std::to_string(N) << " ====================\n";
-        std::vector<std::vector<SymmetricGroupElement<N + 1>>> abstractOvals = orderlyAbstractOvalFinder<N>();
-        for (const std::vector<SymmetricGroupElement<N + 1>>& oval : abstractOvals) {
-            std::cout << listOfPermutationsToString<N + 1>(oval) << "\n";
-        }
+        ::printAllAbstractOvals<N>([](){ return orderlyAbstractOvalFinder<N>(); });
     }
 
     void printAllAbstractOvalsFoundFromOrderlyAlgorithm(int order);

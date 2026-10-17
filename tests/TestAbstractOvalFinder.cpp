@@ -1,7 +1,13 @@
 #include "TestAbstractOvalFinder.h"
 
 void TestSmallOrders() {
-    testAbstractOvalFinderSpecificOrder<4>();
-    testAbstractOvalFinderSpecificOrder<5>();
-    testAbstractOvalFinderSpecificOrder<7>();
+    testBasicAbstractOvalFinderSpecificOrder<4>();
+    testBasicAbstractOvalFinderSpecificOrder<5>();
+    testBasicAbstractOvalFinderSpecificOrder<7>();
+}
+
+void TestSmallOrdersWithOrderly() {
+    testOrderlyAbstractOvalFinderSpecificOrder<4>();
+    testOrderlyAbstractOvalFinderSpecificOrder<5>();
+    testOrderlyAbstractOvalFinderSpecificOrder<7>();
 }
