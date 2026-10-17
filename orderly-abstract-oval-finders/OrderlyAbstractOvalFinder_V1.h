@@ -9,7 +9,7 @@
 #include <map>
 #include <utility>
 #include <optional>
-#include "../orderly/MinimalImage.h"
+#include "MinimalImageWithCache.h"
 #include "../AbstractOvalUtils.h"
 #include "../SymmetricGroupElement.h"
 
@@ -54,7 +54,7 @@ namespace OAOF {
     std::optional<size_t> getFinalPlausibleIndex(std::vector<Node>& nodes);
 
     template <size_t order>
-    void orderlyExactCoverSolverHelper(const std::vector<SymmetricGroupElement<order + 1>>& candidateInvolutions, std::vector<Node>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<size_t>& partialSolution, std::vector<std::vector<int>>& solutions) {
+    void orderlyExactCoverSolverHelper(const std::vector<SymmetricGroupElement<order + 1>>& candidateInvolutions, std::vector<Node>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<size_t>& partialSolution, std::vector<std::vector<int>>& solutions, MinimalImageWithCache::StabilizerCache<order + 1>& sCache) {
         //printAllNodes(nodes);
         if (nodes[0].R == 0) { // all items covered
             //std::cout << "SOLUTION FOUND\n";
@@ -62,14 +62,20 @@ namespace OAOF {
             return;
         }
 
-        if (level != 0 && !isSetOfInvolutionsMinimal(candidateInvolutions, partialSolution, level)) {
-            std::cout << "not minimal, pruning!\n";
-            return;
-        }
-
         std::optional<size_t> indexOfNodeInFinalPlausibleOption = getFinalPlausibleIndex(nodes);
         if (!indexOfNodeInFinalPlausibleOption) {
             return;
+        }
+
+        if (level != 0) {
+            // level is the length of the current partial solution, so one more than the index most recently set in the partial solution
+            // Therefore, we just changed the partial solution at index (level - 1)
+            // The stabilizers will still be valid up until index (level - 2)
+            sCache.cacheFreshUpTo = std::min(sCache.cacheFreshUpTo, level - 2);
+            if (!MinimalImageWithCache::isSetOfInvolutionsMinimal<order + 1>(candidateInvolutions, partialSolution, level, sCache)) {
+                std::cout << "pruning due to being non-minimal\n";
+                return;
+            }
         }
         
         while (currentOptionNodeIndex != 0) {
@@ -89,7 +95,7 @@ namespace OAOF {
             nodes[nodes[currentOptionNodeIndex].D].U = nodes[currentOptionNodeIndex].U;
 
             partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
-            orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions);
+            orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions, sCache);
 
             nodes[nodes[currentOptionNodeIndex].U].D = currentOptionNodeIndex;
             nodes[nodes[currentOptionNodeIndex].D].U = currentOptionNodeIndex;
@@ -109,7 +115,8 @@ namespace OAOF {
         std::vector<std::vector<int>> solutions;
         auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure(coveringData, itemCount);
         std::vector<size_t> partialSolution(itemCount); // assumes every option covers at least one item.
-        orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions);
+        MinimalImageWithCache::StabilizerCache<order + 1> sCache{};
+        orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions, sCache);
         return solutions;
     }
 

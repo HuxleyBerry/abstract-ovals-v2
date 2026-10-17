@@ -5,7 +5,6 @@
 #include "SymmetricGroupElement.h"
 #include "AbstractOvalUtils.h"
 #include "exact-cover-solvers/AlgorithmDLX_V2.h"
-#include "exact-cover-solvers/IncreasingOrderDLX.h"
 #include "orderly/MinimalImage.h"
 
 template <size_t N>
