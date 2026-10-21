@@ -23,7 +23,7 @@ void testBasicAbstractOvalFinderSpecificOrder() {
 
 template <int order>
 void testOrderlyAbstractOvalFinderSpecificOrder() {
-    testAbstractOvalFinderSpecificOrder<order>([]{ return OAOF::orderlyAbstractOvalFinder<order>(); });
+    testAbstractOvalFinderSpecificOrder<order>([]{ return OAOF::orderlyAbstractOvalFinder<order>(std::nullopt); });
 }
 
 void TestSmallOrders();

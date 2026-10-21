@@ -199,10 +199,10 @@ namespace OAOF {
                 printAllAbstractOvals<7>();
                 break;
             case 8:
-                printAllAbstractOvals<8>();
+                printAllAbstractOvals<8>(6);
                 break;
             case 9:
-                printAllAbstractOvals<9>();
+                printAllAbstractOvals<9>(8);
                 break;
             case 10:
                 printAllAbstractOvals<10>();
