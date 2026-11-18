@@ -15,5 +15,5 @@ int main(int argc, char** argv) {
         std::exit(1);
     }
     //printAllAbstractOvalsWithIsomorphsRemoved(order);
-    OAOF::printAllAbstractOvalsFoundFromOrderlyAlgorithm(order);
+    printAllAbstractOvalsFoundFromOrderlyAlgorithm(order);
 }

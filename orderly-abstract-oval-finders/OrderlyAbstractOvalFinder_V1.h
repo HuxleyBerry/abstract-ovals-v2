@@ -13,151 +13,113 @@
 #include "../orderly/MinimalImage.h"
 #include "../AbstractOvalUtils.h"
 #include "../SymmetricGroupElement.h"
+#include "../exact-cover-solvers/IncreasingOrderShared.h"
 
-namespace OAOF {
-    struct Node {
-        std::uint32_t L = 0;
-        std::uint32_t R = 0;
-        std::uint32_t U = 0;
-        std::uint32_t D = 0;
-        std::uint8_t type;
 
-        // In a header node, the properties are named "sensibly", referring to the Left, Right, Up and Down links.
-        // In an option node, we overload as follows:
-        // - L is the index of the previous option node. This is slightly different from U because U will change over time 
-        //   as items are removed from the vertical list of option nodes.
-        // - R is the index of the next option node
-        // In a normal node, we overload as follows:
-        // - L is the index of the header node of the vertical list
-        // - R is unused
+template <size_t order>
+void orderlyExactCoverSolverHelper(const std::vector<SymmetricGroupElement<order + 1>>& candidateInvolutions, std::vector<Node>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<size_t>& partialSolution, std::vector<std::vector<int>>& solutions, MinimalImageWithCache::StabilizerCache<order + 1>& sCache, const std::optional<unsigned int>& orderlyUpTo) {
+    //printAllNodes(nodes);
+    if (nodes[0].R == 0) { // all items covered
+        //std::cout << "SOLUTION FOUND\n";
+        solutions.emplace_back(partialSolution.cbegin(), partialSolution.cbegin() + level);
+        return;
+    }
 
-        Node(std::uint8_t t): type(t) {}
-    };
+    std::optional<size_t> indexOfNodeInFinalPlausibleOption = getFinalPlausibleIndex(nodes);
+    if (!indexOfNodeInFinalPlausibleOption) {
+        return;
+    }
 
-    void addToEndOfHorizontalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex);
-
-    void addToEndOfVerticalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex);
-
-    std::pair<std::vector<Node>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount);
-
-    void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
-
-    void unhideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
-
-    void cover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
-
-    void uncover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide) ;
-
-    std::string nodeToString(const Node& node);
-
-    void printAllNodes(const std::vector<Node>& nodes);
-
-    std::optional<size_t> getFinalPlausibleIndex(std::vector<Node>& nodes);
-
-    template <size_t order>
-    void orderlyExactCoverSolverHelper(const std::vector<SymmetricGroupElement<order + 1>>& candidateInvolutions, std::vector<Node>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<size_t>& partialSolution, std::vector<std::vector<int>>& solutions, MinimalImageWithCache::StabilizerCache<order + 1>& sCache, const std::optional<unsigned int>& orderlyUpTo) {
-        //printAllNodes(nodes);
-        if (nodes[0].R == 0) { // all items covered
-            //std::cout << "SOLUTION FOUND\n";
-            solutions.emplace_back(partialSolution.cbegin(), partialSolution.cbegin() + level);
+    if (level != 0) {
+        // level is the length of the current partial solution, so one more than the index most recently set in the partial solution
+        // Therefore, we just changed the partial solution at index (level - 1)
+        // The stabilizers will still be valid up until index (level - 2)
+        sCache.cacheFreshUpTo = std::min(sCache.cacheFreshUpTo, level - 2);
+        if ((!orderlyUpTo || level <= orderlyUpTo.value()) && !MinimalImageWithCache::isSetOfInvolutionsMinimal<order + 1>(candidateInvolutions, partialSolution, level, sCache)) {
+            //std::cout << "level " << level << ": pruning due to being non-minimal\n";
             return;
         }
-
-        std::optional<size_t> indexOfNodeInFinalPlausibleOption = getFinalPlausibleIndex(nodes);
-        if (!indexOfNodeInFinalPlausibleOption) {
-            return;
+    }
+    
+    while (currentOptionNodeIndex != 0) {
+        if (currentOptionNodeIndex > indexOfNodeInFinalPlausibleOption) {
+            break;
+        }
+        //std::cout << "Selecting option " << optionNodeIndexToOptionIndex.at(currentOptionNodeIndex) << " at level " << level << "\n";
+        size_t currIndexWithinOption = currentOptionNodeIndex + 1;
+        while (nodes[currIndexWithinOption].type == 2) {
+            //std::cout << "calling cover on index node " << nodes[currIndexWithinOption].L << "\n";
+            cover(nodes, nodes[currIndexWithinOption].L, currentOptionNodeIndex);
+            ++currIndexWithinOption;
         }
 
-        if (level != 0) {
-            // level is the length of the current partial solution, so one more than the index most recently set in the partial solution
-            // Therefore, we just changed the partial solution at index (level - 1)
-            // The stabilizers will still be valid up until index (level - 2)
-            sCache.cacheFreshUpTo = std::min(sCache.cacheFreshUpTo, level - 2);
-            if ((!orderlyUpTo || level <= orderlyUpTo.value()) && !MinimalImageWithCache::isSetOfInvolutionsMinimal<order + 1>(candidateInvolutions, partialSolution, level, sCache)) {
-                //std::cout << "level " << level << ": pruning due to being non-minimal\n";
-                return;
-            }
-        }
-        
-        while (currentOptionNodeIndex != 0) {
-            if (currentOptionNodeIndex > indexOfNodeInFinalPlausibleOption) {
-                break;
-            }
-            //std::cout << "Selecting option " << optionNodeIndexToOptionIndex.at(currentOptionNodeIndex) << " at level " << level << "\n";
-            size_t currIndexWithinOption = currentOptionNodeIndex + 1;
-            while (nodes[currIndexWithinOption].type == 2) {
-                //std::cout << "calling cover on index node " << nodes[currIndexWithinOption].L << "\n";
-                cover(nodes, nodes[currIndexWithinOption].L, currentOptionNodeIndex);
-                ++currIndexWithinOption;
-            }
+        size_t next = nodes[currentOptionNodeIndex].D;
+        nodes[nodes[currentOptionNodeIndex].U].D = nodes[currentOptionNodeIndex].D;
+        nodes[nodes[currentOptionNodeIndex].D].U = nodes[currentOptionNodeIndex].U;
 
-            size_t next = nodes[currentOptionNodeIndex].D;
-            nodes[nodes[currentOptionNodeIndex].U].D = nodes[currentOptionNodeIndex].D;
-            nodes[nodes[currentOptionNodeIndex].D].U = nodes[currentOptionNodeIndex].U;
+        partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
+        orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions, sCache, orderlyUpTo);
 
-            partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
-            orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions, sCache, orderlyUpTo);
+        nodes[nodes[currentOptionNodeIndex].U].D = currentOptionNodeIndex;
+        nodes[nodes[currentOptionNodeIndex].D].U = currentOptionNodeIndex;
 
-            nodes[nodes[currentOptionNodeIndex].U].D = currentOptionNodeIndex;
-            nodes[nodes[currentOptionNodeIndex].D].U = currentOptionNodeIndex;
-
+        --currIndexWithinOption;
+        while (nodes[currIndexWithinOption].type == 2) {
+            uncover(nodes, nodes[currIndexWithinOption].L, currentOptionNodeIndex);
             --currIndexWithinOption;
-            while (nodes[currIndexWithinOption].type == 2) {
-                uncover(nodes, nodes[currIndexWithinOption].L, currentOptionNodeIndex);
-                --currIndexWithinOption;
-            }
-
-            currentOptionNodeIndex = nodes[currentOptionNodeIndex].D;
         }
-    }
 
-    template <size_t order>
-    std::vector<std::vector<int>> orderlyExactCoverSolver(const std::vector<SymmetricGroupElement<order + 1>>& candidateInvolutions, const std::vector<std::vector<int>>& coveringData, int itemCount, const std::optional<unsigned int>& orderlyUpTo) {
-        std::vector<std::vector<int>> solutions;
-        auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure(coveringData, itemCount);
-        std::vector<size_t> partialSolution(itemCount); // assumes every option covers at least one item.
-        MinimalImageWithCache::StabilizerCache<order + 1> sCache{};
-        orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions, sCache, orderlyUpTo);
-        return solutions;
+        currentOptionNodeIndex = nodes[currentOptionNodeIndex].D;
     }
-
-    template <size_t order>
-    std::vector<std::vector<SymmetricGroupElement<order + 1>>> orderlyAbstractOvalFinder(const std::optional<unsigned int>& orderlyUpTo) {
-        std::vector<SymmetricGroupElement<order + 1>> candidateInvolutions(getAbstractOvalCandidatePermutations<order>());
-        // need to sort to be compatible with the minimal image checking
-        std::sort(candidateInvolutions.begin(), candidateInvolutions.end());
-        std::vector<FourPoints> quadruplesToBeCovered(getPointCombinationsForAbstractOval(order));
-        auto coveringData = getCovering<order>(candidateInvolutions, quadruplesToBeCovered);
-        std::vector<std::vector<int>> solutionsAsIndices = orderlyExactCoverSolver<order>(candidateInvolutions, coveringData, quadruplesToBeCovered.size(), orderlyUpTo);
-        // only append the identity if orderlyUpTo has no value because otherwise we need to filter for minimality
-        // and the minimality check assumes no identity.
-        return involutionIndicesToAbstractOvals<order>(solutionsAsIndices, candidateInvolutions, !orderlyUpTo);
-    }
-
-    template <size_t order>
-    std::vector<std::vector<SymmetricGroupElement<order + 1>>> orderlyAbstractOvalFinderNoIsomorphs(const std::optional<unsigned int>& orderlyUpTo = std::nullopt) {
-        auto unfiltered = orderlyAbstractOvalFinder<order>(orderlyUpTo);
-        if (!orderlyUpTo) {
-            return unfiltered;
-        }
-        std::vector<std::vector<SymmetricGroupElement<order + 1>>> filtered;
-        for (auto& invList: unfiltered) {
-            if (isSetOfInvolutionsMinimal<order + 1>(invList)) {
-                if (orderlyUpTo && order%2 == 1) {
-                    invList.emplace_back("()");
-                }
-                filtered.push_back(std::move(invList));
-            }
-        }
-        return filtered;
-    }
-
-    template <size_t N>
-    void printAllAbstractOvals(const std::optional<unsigned int>& orderlyUpTo = std::nullopt) {
-        ::printAllAbstractOvals<N>([&](){ return orderlyAbstractOvalFinderNoIsomorphs<N>(orderlyUpTo); });
-    }
-
-    void printAllAbstractOvalsFoundFromOrderlyAlgorithm(int order);
 }
+
+template <size_t order>
+std::vector<std::vector<int>> orderlyExactCoverSolver(const std::vector<SymmetricGroupElement<order + 1>>& candidateInvolutions, const std::vector<std::vector<int>>& coveringData, int itemCount, const std::optional<unsigned int>& orderlyUpTo) {
+    std::vector<std::vector<int>> solutions;
+    auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure(coveringData, itemCount);
+    std::vector<size_t> partialSolution(itemCount); // assumes every option covers at least one item.
+    MinimalImageWithCache::StabilizerCache<order + 1> sCache(orderlyUpTo.value_or((order + 1) * (order + 1)));
+    orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions, sCache, orderlyUpTo);
+    return solutions;
+}
+
+template <size_t order>
+std::vector<std::vector<SymmetricGroupElement<order + 1>>> orderlyAbstractOvalFinder(const std::optional<unsigned int>& orderlyUpTo) {
+    std::vector<SymmetricGroupElement<order + 1>> candidateInvolutions(getAbstractOvalCandidatePermutations<order>());
+    // need to sort to be compatible with the minimal image checking
+    std::sort(candidateInvolutions.begin(), candidateInvolutions.end());
+    std::vector<FourPoints> quadruplesToBeCovered(getPointCombinationsForAbstractOval(order));
+    auto coveringData = getCovering<order>(candidateInvolutions, quadruplesToBeCovered);
+    std::vector<std::vector<int>> solutionsAsIndices = orderlyExactCoverSolver<order>(candidateInvolutions, coveringData, quadruplesToBeCovered.size(), orderlyUpTo);
+    // only append the identity if orderlyUpTo has no value because otherwise we need to filter for minimality
+    // and the minimality check assumes no identity.
+    return involutionIndicesToAbstractOvals<order>(solutionsAsIndices, candidateInvolutions, !orderlyUpTo);
+}
+
+template <size_t order>
+std::vector<std::vector<SymmetricGroupElement<order + 1>>> orderlyAbstractOvalFinderNoIsomorphs(const std::optional<unsigned int>& orderlyUpTo = std::nullopt) {
+    auto unfiltered = orderlyAbstractOvalFinder<order>(orderlyUpTo);
+    if (!orderlyUpTo) {
+        return unfiltered;
+    }
+    std::cout << "Abstract Ovals found, now filtering out isomorphs\n";
+    std::vector<std::vector<SymmetricGroupElement<order + 1>>> filtered;
+    for (auto& invList: unfiltered) {
+        if (isSetOfInvolutionsMinimal<order + 1>(invList)) {
+            if (orderlyUpTo && order%2 == 1) {
+                invList.emplace_back("()");
+            }
+            filtered.push_back(std::move(invList));
+        }
+    }
+    return filtered;
+}
+
+template <size_t N>
+void printAllAbstractOvals(const std::optional<unsigned int>& orderlyUpTo = std::nullopt) {
+    printAllAbstractOvals<N>([&](){ return orderlyAbstractOvalFinderNoIsomorphs<N>(orderlyUpTo); });
+}
+
+void printAllAbstractOvalsFoundFromOrderlyAlgorithm(int order);
 
 #endif

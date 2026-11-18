@@ -21,8 +21,17 @@ namespace MinimalImageWithCache {
         std::vector<std::vector<SymmetricGroupElement<N>>> pointwiseStabilizers; // index i holds the pointwise stabilizer of involutions 0..i
         int cacheFreshUpTo; // the largest index of pointwiseStabilizers that the cache is fresh at
 
-        StabilizerCache(): pointwiseStabilizers(std::vector<std::vector<SymmetricGroupElement<N>>>((N - 1) * (N - 1))), cacheFreshUpTo(-1) {}
+        StabilizerCache(size_t maxCacheSize): pointwiseStabilizers(std::vector<std::vector<SymmetricGroupElement<N>>>(maxCacheSize)), cacheFreshUpTo(-1) {}
     };
+
+    template <size_t N>
+    void printStabilizerCache(const StabilizerCache<N>& s) {
+        std::cout << "Stabilizer sizes: ";
+        for (int i = 0; i <= s.cacheFreshUpTo; ++i) {
+            std::cout << s.pointwiseStabilizers[i].size() << ",";
+        }
+        std::cout << "\n";
+    }
 
     /*
     Parameters:
@@ -57,7 +66,8 @@ namespace MinimalImageWithCache {
                 SymmetricGroupElement<N> bestGroupElement;
                 for (const SymmetricGroupElement<N>& stabilizerElement : sCache.pointwiseStabilizers[indexIntoPermutation - 1]) {
                     const SymmetricGroupElement<N> rightCosetMember = stabilizerElement * minimumAchievingGroupElement;
-                    const SymmetricGroupElement<N> image = conjugate(allInvolutions[involutionSelectionIndices[partialPermutation[indexIntoPermutation]]], rightCosetMember); if (flag || image < minimumInOrbit) {
+                    const SymmetricGroupElement<N> image = conjugate(allInvolutions[involutionSelectionIndices[partialPermutation[indexIntoPermutation]]], rightCosetMember);
+                    if (flag || image < minimumInOrbit) {
                         minimumInOrbit = image;
                         bestGroupElement = rightCosetMember;
                     }
