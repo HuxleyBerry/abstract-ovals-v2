@@ -7,6 +7,7 @@ SHARED_SOURCES := \
 	exact-cover-solvers/AlgorithmDLX_V2.cpp \
 	exact-cover-solvers/IncreasingOrderDLX.cpp \
 	exact-cover-solvers/IncreasingOrderShared.cpp \
+	exact-cover-solvers/IncreasingOrderHybridDLX.cpp \
 	orderly-abstract-oval-finders/OrderlyAbstractOvalFinder_V1.cpp \
 	BasicAbstractOvalFinder.cpp \
 	orderly/MinimalImageUtils.cpp

@@ -9,7 +9,7 @@
 
 namespace {
 
-    void algorithmX_V2_Helper(std::vector<Node>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions) {
+    void increasingOrderSolver_Helper(std::vector<Node>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions) {
         //printAllNodes(nodes);
         if (nodes[0].R == 0) { // all items covered
             //std::cout << "SOLUTION FOUND\n";
@@ -39,7 +39,7 @@ namespace {
             nodes[nodes[currentOptionNodeIndex].D].U = nodes[currentOptionNodeIndex].U;
 
             partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
-            algorithmX_V2_Helper(nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions);
+            increasingOrderSolver_Helper(nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions);
 
             nodes[nodes[currentOptionNodeIndex].U].D = currentOptionNodeIndex;
             nodes[nodes[currentOptionNodeIndex].D].U = currentOptionNodeIndex;
@@ -59,6 +59,6 @@ std::vector<std::vector<int>> increasingOrderSolver(const std::vector<std::vecto
     std::vector<std::vector<int>> solutions;
     auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure(data, itemCount);
     std::vector<int> partialSolution(itemCount); // assumes every option covers at least one item.
-    algorithmX_V2_Helper(nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions);
+    increasingOrderSolver_Helper(nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions);
     return solutions;
 }

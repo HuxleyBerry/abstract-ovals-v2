@@ -4,6 +4,7 @@ Algorithm improvement ideas:
    - Do BFS to find minimum of orbit
    - Compare x with the result of conjugating g by h by only calculating the images within g^h as necessary
  - After switching from orderly algorithm to symmetry-ignoring algorithm, go back to algorithm X.
+ - During increasing order solving stage, cover downwards only (see branch)
  - Read up on Knuth's ssmcc dancing links solver
  - Not enforcing canonicity at every stage, but some weaker form of pruning. Investigate semi-canonicity or strong semi-canonicity
  - Investigate if there's a way of using the pairwise ordering trick with secondary items to eliminate some symmetry
