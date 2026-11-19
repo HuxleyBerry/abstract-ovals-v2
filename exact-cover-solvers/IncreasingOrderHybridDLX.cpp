@@ -9,10 +9,15 @@
 
 namespace {
 
-    // TODO: fix this. Will need to add a field to Node to store top/use count
-    //
-    /*
-    void algorithmXHelper(std::vector<Node>& nodes, int level, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions) {
+    void cover2(std::vector<ENode>& nodes, size_t indexForItem) {
+
+    }
+
+    void uncover2(std::vector<ENode>& nodes, size_t indexForItem) {
+
+    }
+
+    void algorithmXHelper(std::vector<ENode>& nodes, int level, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions) {
         if (nodes[0].R == 0) { // all items covered
             // note a copy of partialSolution is made.
             solutions.emplace_back(partialSolution.cbegin(), partialSolution.cbegin() + level);
@@ -23,14 +28,14 @@ namespace {
         size_t currentNodeIndex = nodes[0].R;
         size_t indexOfChosenItem;
         while (currentNodeIndex != 0) {
-            if (flag || nodes[currentNodeIndex].top < minOptionsCovering) {
+            if (flag || nodes[currentNodeIndex].count < minOptionsCovering) {
                 flag = false;
-                minOptionsCovering = nodes[currentNodeIndex].top;
+                minOptionsCovering = nodes[currentNodeIndex].count;
                 indexOfChosenItem = currentNodeIndex;
             }
             currentNodeIndex = nodes[currentNodeIndex].R;
         }
-        cover(nodes, indexOfChosenItem);
+        cover2(nodes, indexOfChosenItem);
 
         size_t currentOptionNodeIndex = nodes[indexOfChosenItem].D;
         while (currentOptionNodeIndex != indexOfChosenItem) {
@@ -38,11 +43,11 @@ namespace {
             // now cover all the items covered by the current option
             size_t curr = currentOptionNodeIndex + 1;
             while (curr != currentOptionNodeIndex) {
-                size_t top = nodes[curr].top;
-                if (top == 0) { // spacer
-                    curr = nodes[curr].U;
+                size_t top = nodes[curr].L;
+                if (nodes[curr].type == 1) { // option node
+                    curr = top + 1;
                 } else {
-                    cover(nodes, top);
+                    cover2(nodes, top);
                     ++curr;
                 }
             }
@@ -52,20 +57,19 @@ namespace {
             // undo the covering
             curr = currentOptionNodeIndex - 1;
             while (curr != currentOptionNodeIndex) {
-                size_t top = nodes[curr].top;
-                if (top == 0) { // spacer
-                    curr = nodes[curr].D;
+                size_t top = nodes[curr].R;
+                if (nodes[curr].type == 1) { // option node
+                    curr = top - 1;
                 } else {
-                    uncover(nodes, top);
+                    uncover2(nodes, top);
                     --curr;
                 }
             }
             currentOptionNodeIndex = nodes[currentOptionNodeIndex].D;
         }
 
-        uncover(nodes, indexOfChosenItem);
+        uncover2(nodes, indexOfChosenItem);
     }
-    */
 
     void increasingOrderHybridSolver_Helper(std::vector<ENode>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions, size_t sizeToTransitionAt) {
         //printAllNodes(nodes);

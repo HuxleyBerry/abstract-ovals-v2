@@ -26,7 +26,7 @@ struct Node {
 
 struct ENode: public Node {
     // In a header node, used to count the number of remaining options covering the item.
-    std::uint32_t top;
+    std::uint32_t count = 0;
 
     using Node::Node;
 };

@@ -69,6 +69,9 @@ std::pair<std::vector<NodeType>, std::map<size_t, size_t>> makeLinkStructure(con
             nodes.emplace_back(2);
             addToEndOfVerticalDoublyLinkedList(nodes, itemIdx + 1, currentIndex);
             nodes[currentIndex].L = itemIdx + 1;
+            if constexpr (std::is_same_v<NodeType, ENode>) {
+                ++nodes[itemIdx + 1].count; //increment the count of the corresponding header
+            }
             ++currentIndex;
         }
         if (i == data.size() - 1) {
@@ -167,7 +170,7 @@ std::string nodeToString(const NodeType& node) {
         ss << ", L: " << node.L;
         ss << ", R: " << node.R;
         if constexpr (std::is_same_v<NodeType, ENode>) {
-            ss << ", count: " << node.top;
+            ss << ", count: " << node.count;
         }
         ss << " }";
     } else if (node.type == 1) {
