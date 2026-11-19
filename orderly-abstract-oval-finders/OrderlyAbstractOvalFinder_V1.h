@@ -53,14 +53,9 @@ void orderlyExactCoverSolverHelper(const std::vector<SymmetricGroupElement<order
         }
 
         size_t next = nodes[currentOptionNodeIndex].D;
-        nodes[nodes[currentOptionNodeIndex].U].D = nodes[currentOptionNodeIndex].D;
-        nodes[nodes[currentOptionNodeIndex].D].U = nodes[currentOptionNodeIndex].U;
 
         partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
         orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions, sCache, orderlyUpTo);
-
-        nodes[nodes[currentOptionNodeIndex].U].D = currentOptionNodeIndex;
-        nodes[nodes[currentOptionNodeIndex].D].U = currentOptionNodeIndex;
 
         --currIndexWithinOption;
         while (nodes[currIndexWithinOption].type == 2) {
@@ -75,7 +70,7 @@ void orderlyExactCoverSolverHelper(const std::vector<SymmetricGroupElement<order
 template <size_t order>
 std::vector<std::vector<int>> orderlyExactCoverSolver(const std::vector<SymmetricGroupElement<order + 1>>& candidateInvolutions, const std::vector<std::vector<int>>& coveringData, int itemCount, const std::optional<unsigned int>& orderlyUpTo) {
     std::vector<std::vector<int>> solutions;
-    auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure(coveringData, itemCount);
+    auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure<Node>(coveringData, itemCount);
     std::vector<size_t> partialSolution(itemCount); // assumes every option covers at least one item.
     MinimalImageWithCache::StabilizerCache<order + 1> sCache(orderlyUpTo.value_or((order + 1) * (order + 1)));
     orderlyExactCoverSolverHelper<order>(candidateInvolutions, nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions, sCache, orderlyUpTo);

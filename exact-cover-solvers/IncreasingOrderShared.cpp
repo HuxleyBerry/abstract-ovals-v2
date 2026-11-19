@@ -3,9 +3,11 @@
 #include <sstream>
 #include <map>
 #include <optional>
+#include <type_traits>
 #include "IncreasingOrderShared.h"
 
-void addToEndOfHorizontalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex) {
+template <typename NodeType>
+void addToEndOfHorizontalDoublyLinkedList(std::vector<NodeType>& nodeStorage, size_t startIndex, size_t toAddIndex) {
     std::uint32_t endIndex = nodeStorage[startIndex].L;
     nodeStorage[endIndex].R = toAddIndex;
     nodeStorage[startIndex].L = toAddIndex;
@@ -13,7 +15,11 @@ void addToEndOfHorizontalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t
     nodeStorage[toAddIndex].R = startIndex;
 }
 
-void addToEndOfVerticalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex) {
+template void addToEndOfHorizontalDoublyLinkedList<Node>(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex);
+template void addToEndOfHorizontalDoublyLinkedList<ENode>(std::vector<ENode>& nodeStorage, size_t startIndex, size_t toAddIndex);
+
+template <typename NodeType>
+void addToEndOfVerticalDoublyLinkedList(std::vector<NodeType>& nodeStorage, size_t startIndex, size_t toAddIndex) {
     std::uint32_t endIndex = nodeStorage[startIndex].U;
     nodeStorage[endIndex].D = toAddIndex;
     nodeStorage[startIndex].U = toAddIndex;
@@ -21,12 +27,16 @@ void addToEndOfVerticalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t s
     nodeStorage[toAddIndex].D = startIndex;
 }
 
-std::pair<std::vector<Node>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount) {
+template void addToEndOfVerticalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex);
+template void addToEndOfVerticalDoublyLinkedList(std::vector<ENode>& nodeStorage, size_t startIndex, size_t toAddIndex);
+
+template <typename NodeType>
+std::pair<std::vector<NodeType>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount) {
     int requiredNodeCount = 2 + itemCount;
     for (const std::vector<int>& option: data) {
         requiredNodeCount += (option.size() + 1);
     }
-    std::vector<Node> nodes;
+    std::vector<NodeType> nodes;
     nodes.reserve(requiredNodeCount);
 
     std::map<size_t, size_t> optionNodeIndexToOptionIndex;
@@ -70,7 +80,11 @@ std::pair<std::vector<Node>, std::map<size_t, size_t>> makeLinkStructure(const s
     return std::pair(nodes, optionNodeIndexToOptionIndex);
 }
 
-void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide) {
+template std::pair<std::vector<Node>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount);
+template std::pair<std::vector<ENode>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount);
+
+template <typename NodeType>
+void hideOption(std::vector<NodeType>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide) {
     size_t currentIndex = indexForNormalNode + 1;
     while (currentIndex != indexForNormalNode) {
         if (nodes[currentIndex].type == 1) { // option node
@@ -90,7 +104,11 @@ void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t opti
     }
 }
 
-void unhideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide) {
+template void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+template void hideOption(std::vector<ENode>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+
+template <typename NodeType>
+void unhideOption(std::vector<NodeType>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide) {
     size_t currentIndex = indexForNormalNode - 1;
     while (currentIndex != indexForNormalNode) {
         if (nodes[currentIndex].type == 1) { // option node
@@ -108,7 +126,11 @@ void unhideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t op
     }
 }
 
-void cover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide) {
+template void unhideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+template void unhideOption(std::vector<ENode>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+
+template <typename NodeType>
+void cover(std::vector<NodeType>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide) {
     size_t currentIndex = nodes[indexForItemNode].D;
     while (currentIndex != indexForItemNode) {
         hideOption(nodes, currentIndex, optionNodeToNotHide);
@@ -118,7 +140,11 @@ void cover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeT
     nodes[nodes[indexForItemNode].R].L = nodes[indexForItemNode].L;
 }
 
-void uncover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide) {
+template void cover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+template void cover(std::vector<ENode>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+
+template <typename NodeType>
+void uncover(std::vector<NodeType>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide) {
     nodes[nodes[indexForItemNode].L].R = indexForItemNode;
     nodes[nodes[indexForItemNode].R].L = indexForItemNode;
     size_t currentIndex = nodes[indexForItemNode].U;
@@ -128,7 +154,11 @@ void uncover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNod
     }
 }
 
-std::string nodeToString(const Node& node) {
+template void uncover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+template void uncover(std::vector<ENode>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+
+template <typename NodeType>
+std::string nodeToString(const NodeType& node) {
     std::ostringstream ss;
     if (node.type == 0) {
         ss << "header node: { ";
@@ -136,6 +166,9 @@ std::string nodeToString(const Node& node) {
         ss << ", D: " << node.D;
         ss << ", L: " << node.L;
         ss << ", R: " << node.R;
+        if constexpr (std::is_same_v<NodeType, ENode>) {
+            ss << ", count: " << node.top;
+        }
         ss << " }";
     } else if (node.type == 1) {
         ss << "option node: { ";
@@ -154,13 +187,21 @@ std::string nodeToString(const Node& node) {
     return ss.str();
 }
 
-void printAllNodes(const std::vector<Node>& nodes) {
-    for (const Node& n: nodes) {
+template std::string nodeToString(const Node& node);
+template std::string nodeToString(const ENode& node);
+
+template <typename NodeType>
+void printAllNodes(const std::vector<NodeType>& nodes) {
+    for (const NodeType& n: nodes) {
         std::cout << nodeToString(n) << "\n";
     }
 }
 
-std::optional<size_t> getFinalPlausibleIndex(std::vector<Node>& nodes) {
+template void printAllNodes(const std::vector<Node>& nodes);
+template void printAllNodes(const std::vector<ENode>& nodes);
+
+template <typename NodeType>
+std::optional<size_t> getFinalPlausibleIndex(std::vector<NodeType>& nodes) {
     size_t currentNode = nodes[0].R;
     bool flag = true;
     size_t smallestFinalNodeInVerticalList;
@@ -177,3 +218,6 @@ std::optional<size_t> getFinalPlausibleIndex(std::vector<Node>& nodes) {
     }
     return std::make_optional(smallestFinalNodeInVerticalList);
 }
+
+template std::optional<size_t> getFinalPlausibleIndex(std::vector<Node>& nodes);
+template std::optional<size_t> getFinalPlausibleIndex(std::vector<ENode>& nodes);

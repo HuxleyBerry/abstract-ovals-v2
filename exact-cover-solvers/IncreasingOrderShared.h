@@ -24,24 +24,71 @@ struct Node {
     Node(std::uint8_t t): type(t) {}
 };
 
-void addToEndOfHorizontalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex);
+struct ENode: public Node {
+    // In a header node, used to count the number of remaining options covering the item.
+    std::uint32_t top;
 
-void addToEndOfVerticalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex);
+    using Node::Node;
+};
 
-std::pair<std::vector<Node>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount);
+template <typename NodeType>
+void addToEndOfHorizontalDoublyLinkedList(std::vector<NodeType>& nodeStorage, size_t startIndex, size_t toAddIndex);
 
-void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+extern template void addToEndOfHorizontalDoublyLinkedList<Node>(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex);
+extern template void addToEndOfHorizontalDoublyLinkedList<ENode>(std::vector<ENode>& nodeStorage, size_t startIndex, size_t toAddIndex);
 
-void unhideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+template <typename NodeType>
+void addToEndOfVerticalDoublyLinkedList(std::vector<NodeType>& nodeStorage, size_t startIndex, size_t toAddIndex);
 
-void cover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+extern template void addToEndOfVerticalDoublyLinkedList(std::vector<Node>& nodeStorage, size_t startIndex, size_t toAddIndex);
+extern template void addToEndOfVerticalDoublyLinkedList(std::vector<ENode>& nodeStorage, size_t startIndex, size_t toAddIndex);
 
-void uncover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+template <typename NodeType>
+std::pair<std::vector<NodeType>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount);
 
-std::string nodeToString(const Node& node);
+extern template std::pair<std::vector<Node>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount);
+extern template std::pair<std::vector<ENode>, std::map<size_t, size_t>> makeLinkStructure(const std::vector<std::vector<int>>& data, int itemCount);
 
-void printAllNodes(const std::vector<Node>& nodes);
+template <typename NodeType>
+void hideOption(std::vector<NodeType>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
 
-std::optional<size_t> getFinalPlausibleIndex(std::vector<Node>& nodes);
+extern template void hideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+extern template void hideOption(std::vector<ENode>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+
+template <typename NodeType>
+void unhideOption(std::vector<NodeType>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+
+extern template void unhideOption(std::vector<Node>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+extern template void unhideOption(std::vector<ENode>& nodes, size_t indexForNormalNode, size_t optionNodeToNotHide);
+
+template <typename NodeType>
+void cover(std::vector<NodeType>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+
+extern template void cover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+extern template void cover(std::vector<ENode>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+
+template <typename NodeType>
+void uncover(std::vector<NodeType>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+
+extern template void uncover(std::vector<Node>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+extern template void uncover(std::vector<ENode>& nodes, size_t indexForItemNode, size_t optionNodeToNotHide);
+
+template <typename NodeType>
+std::string nodeToString(const NodeType& node);
+
+extern template std::string nodeToString(const Node& node);
+extern template std::string nodeToString(const ENode& node);
+
+template <typename NodeType>
+void printAllNodes(const std::vector<NodeType>& nodes);
+
+extern template void printAllNodes(const std::vector<Node>& nodes);
+extern template void printAllNodes(const std::vector<ENode>& nodes);
+
+template <typename NodeType>
+std::optional<size_t> getFinalPlausibleIndex(std::vector<NodeType>& nodes);
+
+extern template std::optional<size_t> getFinalPlausibleIndex(std::vector<Node>& nodes);
+extern template std::optional<size_t> getFinalPlausibleIndex(std::vector<ENode>& nodes);
 
 #endif

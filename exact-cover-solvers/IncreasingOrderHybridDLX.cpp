@@ -67,7 +67,7 @@ namespace {
     }
     */
 
-    void increasingOrderHybridSolver_Helper(std::vector<Node>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions, size_t sizeToTransitionAt) {
+    void increasingOrderHybridSolver_Helper(std::vector<ENode>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions, size_t sizeToTransitionAt) {
         //printAllNodes(nodes);
         if (nodes[0].R == 0) { // all items covered
             //std::cout << "SOLUTION FOUND\n";
@@ -94,14 +94,9 @@ namespace {
                 }
 
                 size_t next = nodes[currentOptionNodeIndex].D;
-                nodes[nodes[currentOptionNodeIndex].U].D = nodes[currentOptionNodeIndex].D;
-                nodes[nodes[currentOptionNodeIndex].D].U = nodes[currentOptionNodeIndex].U;
 
                 partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
                 increasingOrderHybridSolver_Helper(nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions, sizeToTransitionAt);
-
-                nodes[nodes[currentOptionNodeIndex].U].D = currentOptionNodeIndex;
-                nodes[nodes[currentOptionNodeIndex].D].U = currentOptionNodeIndex;
 
                 --currIndexWithinOption;
                 while (nodes[currIndexWithinOption].type == 2) {
@@ -119,7 +114,7 @@ namespace {
 
 std::vector<std::vector<int>> increasingOrderHybridSolver(const std::vector<std::vector<int>>& data, int itemCount, size_t sizeToTransitionAt) {
     std::vector<std::vector<int>> solutions;
-    auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure(data, itemCount);
+    auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure<ENode>(data, itemCount);
     std::vector<int> partialSolution(itemCount); // assumes every option covers at least one item.
     increasingOrderHybridSolver_Helper(nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions, sizeToTransitionAt);
     return solutions;

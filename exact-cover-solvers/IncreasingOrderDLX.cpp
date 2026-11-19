@@ -35,14 +35,9 @@ namespace {
             }
 
             size_t next = nodes[currentOptionNodeIndex].D;
-            nodes[nodes[currentOptionNodeIndex].U].D = nodes[currentOptionNodeIndex].D;
-            nodes[nodes[currentOptionNodeIndex].D].U = nodes[currentOptionNodeIndex].U;
 
             partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
             increasingOrderSolver_Helper(nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions);
-
-            nodes[nodes[currentOptionNodeIndex].U].D = currentOptionNodeIndex;
-            nodes[nodes[currentOptionNodeIndex].D].U = currentOptionNodeIndex;
 
             --currIndexWithinOption;
             while (nodes[currIndexWithinOption].type == 2) {
@@ -57,7 +52,7 @@ namespace {
 
 std::vector<std::vector<int>> increasingOrderSolver(const std::vector<std::vector<int>>& data, int itemCount) {
     std::vector<std::vector<int>> solutions;
-    auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure(data, itemCount);
+    auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure<Node>(data, itemCount);
     std::vector<int> partialSolution(itemCount); // assumes every option covers at least one item.
     increasingOrderSolver_Helper(nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions);
     return solutions;
