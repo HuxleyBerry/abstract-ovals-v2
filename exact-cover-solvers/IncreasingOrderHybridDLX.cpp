@@ -93,9 +93,11 @@ namespace {
     }
 
     void algorithmXHelper(std::vector<ENode>& nodes, int level, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions) {
-        std::cout << "algoX\n";
+        //std::cout << "level: " << level << "\n";
+        //printAllNodes(nodes);
         if (nodes[0].R == 0) { // all items covered
             // note a copy of partialSolution is made.
+            //std::cout << "SOLUTION FOUND\n";
             solutions.emplace_back(partialSolution.cbegin(), partialSolution.cbegin() + level);
             return;
         }
@@ -112,30 +114,32 @@ namespace {
             currentNodeIndex = nodes[currentNodeIndex].R;
         }
         cover(nodes, indexOfChosenItem, false);
+        // std::cout << "extra\n";
+        // printAllNodes(nodes);
 
         size_t currentOptionNodeIndex = nodes[indexOfChosenItem].D;
         while (currentOptionNodeIndex != indexOfChosenItem) {
-            //std::cout << "covering item " << indexOfChosenItem << " with option " << nodes[currentOptionNodeIndex].L << "\n";
+            //std::cout << "covering item " << indexOfChosenItem << "\n";
             // now cover all the items covered by the current option
             size_t curr = currentOptionNodeIndex + 1;
             while (curr != currentOptionNodeIndex) {
                 size_t top = nodes[curr].L;
                 if (nodes[curr].type == 1) { // option node
-                    curr = top + 1;
+                    curr = nodes[curr].L + 1;
                 } else {
                     cover(nodes, top, false);
                     ++curr;
                 }
             }
-            partialSolution[level] = nodes[currentOptionNodeIndex].L; // recall that on a non header node, the L property is used to point to the associated option.
+            partialSolution[level] = nodes[currentOptionNodeIndex].R; // on normal nodes, the R property is used to point to the index of the associated option
             algorithmXHelper(nodes, level + 1, partialSolution, solutions);
             //std::cout << "uncovering\n";
             // undo the covering
             curr = currentOptionNodeIndex - 1;
             while (curr != currentOptionNodeIndex) {
-                size_t top = nodes[curr].R;
+                size_t top = nodes[curr].L;
                 if (nodes[curr].type == 1) { // option node
-                    curr = top - 1;
+                    curr = nodes[curr].R - 1;
                 } else {
                     uncover(nodes, top, false);
                     --curr;
@@ -147,7 +151,7 @@ namespace {
         uncover(nodes, indexOfChosenItem, false);
     }
 
-    void increasingOrderHybridSolver_Helper(std::vector<ENode>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions, size_t sizeToTransitionAt) {
+    void increasingOrderHybridSolver_Helper(std::vector<ENode>& nodes, size_t currentOptionNodeIndex, int level, const std::map<size_t, size_t>& optionNodeIndexToOptionIndex, std::vector<int>& partialSolution, std::vector<std::vector<int>>& solutions, std::vector<size_t>& toUnhideStorage, size_t sizeToTransitionAt) {
         //printAllNodes(nodes);
         //std::cout << "level: " << level << "\n";
         if (nodes[0].R == 0) { // all items covered
@@ -161,7 +165,7 @@ namespace {
             if (!indexOfNodeInFinalPlausibleOption) {
                 return;
             }
-            std::vector<size_t> toUnhideStorage;
+            size_t initialUnhideStorageSize = toUnhideStorage.size();
 
             while (currentOptionNodeIndex != 0) {
                 if (currentOptionNodeIndex > indexOfNodeInFinalPlausibleOption) {
@@ -179,7 +183,7 @@ namespace {
                 size_t next = nodes[0].D;
 
                 partialSolution[level] = optionNodeIndexToOptionIndex.at(currentOptionNodeIndex);
-                increasingOrderHybridSolver_Helper(nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions, sizeToTransitionAt);
+                increasingOrderHybridSolver_Helper(nodes, next, level + 1, optionNodeIndexToOptionIndex, partialSolution, solutions, toUnhideStorage, sizeToTransitionAt);
 
 
                 --currIndexWithinOption;
@@ -190,17 +194,14 @@ namespace {
 
                 // TODO: rather than hiding, consider amending the uncovering above to skip this unhiding
                 hideOptionUsingOptionNode(nodes, currentOptionNodeIndex);
-                /*toUnhideStorage[unhideStorageCurrentIndex] = currentOptionNodeIndex;
-                //std::cout << unhideStorageCurrentIndex << "\n";
-                ++unhideStorageCurrentIndex;*/
                 toUnhideStorage.push_back(currentOptionNodeIndex);
 
-                //std::cout << "trying alternate option of " << nodes[0].D << " at level " << level << "\n";
                 currentOptionNodeIndex = nodes[0].D;
             }
 
-            for (auto itr = toUnhideStorage.crbegin(); itr != toUnhideStorage.crend(); ++itr) {
-                unhideOptionUsingOptionNode(nodes, *itr);
+            while (toUnhideStorage.size() > initialUnhideStorageSize) {
+                unhideOptionUsingOptionNode(nodes, toUnhideStorage.back());
+                toUnhideStorage.pop_back();
             }
         } else {
             algorithmXHelper(nodes, level, partialSolution, solutions);
@@ -212,7 +213,8 @@ std::vector<std::vector<int>> increasingOrderHybridSolver(const std::vector<std:
     std::vector<std::vector<int>> solutions;
     auto [nodes, optionNodeIndexToOptionIndex] = makeLinkStructure<ENode>(data, itemCount);
     std::vector<int> partialSolution(itemCount); // assumes every option covers at least one item.
-    //std::vector<size_t> toUnhideStorage(data.size()); // large enough to hold an index for every option.
-    increasingOrderHybridSolver_Helper(nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions, sizeToTransitionAt);
+    std::vector<size_t> toUnhideStorage;
+    toUnhideStorage.reserve(data.size()); // large enough to hold an index for every option.
+    increasingOrderHybridSolver_Helper(nodes, nodes[0].D, 0, optionNodeIndexToOptionIndex, partialSolution, solutions, toUnhideStorage, sizeToTransitionAt);
     return solutions;
 }

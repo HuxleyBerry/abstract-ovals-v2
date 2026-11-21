@@ -71,6 +71,7 @@ std::pair<std::vector<NodeType>, std::map<size_t, size_t>> makeLinkStructure(con
             nodes[currentIndex].L = itemIdx + 1;
             if constexpr (std::is_same_v<NodeType, ENode>) {
                 ++nodes[itemIdx + 1].count; //increment the count of the corresponding header
+                nodes[currentIndex].R = i;
             }
             ++currentIndex;
         }

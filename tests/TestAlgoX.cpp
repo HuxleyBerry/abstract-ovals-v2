@@ -169,7 +169,43 @@ void TestIncreasingOrderDLXSolutionsAreInOrder() {
 }
 
 void TestIncreasingOrderHybridDLX() {
-    testExactCoverSolver([](const std::vector<std::vector<int>>& data, int itemCount){
-        return increasingOrderHybridSolver(data, itemCount, 100);
-    });
+    for (int i = 0; i < 4; ++i) {
+        testExactCoverSolver([i](const std::vector<std::vector<int>>& data, int itemCount){
+            return increasingOrderHybridSolver(data, itemCount, i);
+        });
+    }
+}
+
+void TestIncreasingOrderHybridDLXSolutionsArePartiallyInOrder() {
+    std::vector<std::vector<int>> data = {
+        {0, 1},
+        {2, 3},
+        {0, 2},
+        {1, 3},
+        {0, 3},
+        {1, 2},
+        {4, 5},
+        {6, 7},
+        {4, 6},
+        {5, 7},
+        {4, 7},
+        {5, 6}
+    };
+
+    int switchIndex = 2;
+
+    std::vector<std::vector<int>> solutions = increasingOrderHybridSolver(data, 8, switchIndex);
+    for (const std::vector<int>& sol : solutions) {
+        for (int i = 1; i < sol.size(); ++i) {
+            if (i < switchIndex) {
+                if (sol[i] <= sol[i - 1]) {
+                    throw TestException("Expected first " + std::to_string(switchIndex) + " elements of solution to be in ascending order: " + vectorToString(sol));
+                }
+            } else {
+                if (sol[i] <= sol[switchIndex - 1]) {
+                    throw TestException("Expected elements of index >= " + std::to_string(switchIndex) + " to be greater than the elements with index < " + std::to_string(switchIndex) + ": " + vectorToString(sol));
+                }
+            }
+        }
+    }
 }
