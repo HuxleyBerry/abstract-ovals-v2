@@ -10,6 +10,7 @@ void TestAlgoXV1();
 void TestAlgoXV2();
 void TestIncreasingOrderDLX();
 void TestIncreasingOrderDLXSolutionsAreInOrder();
+void TestIncreasingOrderHybridDLX();
 
 class TestAlgoX : public TestSuite {
 public:
@@ -18,5 +19,6 @@ public:
         AddToTestSuite(TestAlgoXV2);
         AddToTestSuite(TestIncreasingOrderDLX);
         AddToTestSuite(TestIncreasingOrderDLXSolutionsAreInOrder);
+        AddToTestSuite(TestIncreasingOrderHybridDLX);
     }
 };

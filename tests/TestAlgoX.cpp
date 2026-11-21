@@ -7,6 +7,7 @@
 #include "../exact-cover-solvers/AlgorithmDLX_V1.h"
 #include "../exact-cover-solvers/AlgorithmDLX_V2.h"
 #include "../exact-cover-solvers/IncreasingOrderDLX.h"
+#include "../exact-cover-solvers/IncreasingOrderHybridDLX.h"
 
 using namespace std::string_literals;
 
@@ -165,4 +166,10 @@ void TestIncreasingOrderDLXSolutionsAreInOrder() {
             }
         }
     }
+}
+
+void TestIncreasingOrderHybridDLX() {
+    testExactCoverSolver([](const std::vector<std::vector<int>>& data, int itemCount){
+        return increasingOrderHybridSolver(data, itemCount, 100);
+    });
 }
